@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header com Voltar e Ações Básicas -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <a href="javascript:window.close();"
+                class="flex items-center gap-1 text-xs px-3 py-1.5 border clip hover:opacity-70 transition-opacity"
+                style="border-color: var(--border); color: var(--fg);">
+                <span class="material-symbols-outlined text-[14px]">close</span> Fechar Aba
+            </a>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight" style="color: var(--fg);">
+                    {{ contact.customer_name }}
+                </h1>
+                <p class="text-xs mt-1" style="color: var(--muted);">
+                    ID: #{{ contact.id }} &bull; Criado em {{ contact.created_at | brt }}
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <!-- Botão Editar apenas se for o Dono ou Gestor -->
+            {% if current_user.role == 'Gestor' or current_user.id == contact.user_id %}
+            <a href="{{ url_for('edit_contact', contact_id=contact.id) }}"
+                class="flex items-center gap-1.5 px-3 py-1.5 text-xs border clip hover:opacity-70 transition-opacity"
+                style="border-color: var(--border); color: var(--fg); background: var(--surface);">
+                <span class="material-symbols-outlined text-[14px]">edit</span> Editar
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Container dos Dados -->
+    <div class="border clip bg-white dark:bg-[#111] overflow-hidden" style="border-color: var(--border);">
+        <div class="p-6 grid gap-6">
+
+            <!-- Linha 1: Status, Responsável, Prazo -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <span class="block text-[10px] font-medium uppercase tracking-wider mb-1"
+                        style="color: var(--muted);">Status</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full 
+                            {% if contact.status == 'Aberto' %}bg-blue-500
+                            {% elif contact.status == 'Aguardando Cliente' %}bg-orange-500
+                            {% elif contact.status == 'Resolvido' %}bg-green-500
+                            {% else %}bg-gray-500{% endif %}">
+                        </span>
+                        <span class="text-sm font-medium" style="color: var(--fg);">{{ contact.status }}</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-medium uppercase tracking-wider mb-1"
+                        style="color: var(--muted);">Responsável</span>
+                    <span class="text-sm flex items-center gap-1.5" style="color: var(--fg);">
+                        <span class="material-symbols-outlined text-[14px]" style="color: var(--muted);">person</span>
+                        {{ contact.owner.username }}
+                    </span>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-medium uppercase tracking-wider mb-1"
+                        style="color: var(--muted);">Prazo</span>
+                    {% if contact.deadline %}
+                    <span
+                        class="text-sm flex items-center gap-1.5 {% if contact.is_overdue() %}text-red-500 font-medium{% else %}text-[var(--fg)]{% endif %}">
+                        <span class="material-symbols-outlined text-[14px]">event</span>
+                        {{ contact.deadline.strftime('%d/%m/%Y') }}
+                        {% if contact.is_overdue() %} (Atrasado) {% endif %}
+                    </span>
+                    {% else %}
+                    <span class="text-sm" style="color: var(--muted);">Sem prazo definido</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="h-px w-full" style="background: var(--border);"></div>
+
+            <!-- Linha 2: Tipo de Contato, Email, Telefone -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <span class="block text-[10px] font-medium uppercase tracking-wider mb-1"
+                        style="color: var(--muted);">Tipo</span>
+                    <span class="text-sm flex items-center gap-1.5" style="color: var(--fg);">
+                        {% if contact.contact_type == 'Empresa' %}
+                        <span class="material-symbols-outlined text-[14px]" style="color: var(--muted);">domain</span>
+                        {% else %}
+                        <span class="material-symbols-outlined text-[14px]" style="color: var(--muted);">person</span>
+                        {% endif %}
+                        {{ contact.contact_type or 'Pessoa' }}
+                    </span>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-medium uppercase tracking-wider mb-1"
+                        style="color: var(--muted);">Email</span>
+                    {% if contact.email %}
+                    <a href="mailto:{{ contact.email }}" class="text-sm hover:underline flex items-center gap-1.5"
+                        style="color: var(--fg);">
+                        <span class="material-symbols-outlined text-[14px]" style="color: var(--muted);">mail</span>
+                        {{ contact.email }}
+                    </a>
+                    {% else %}
+                    <span class="text-sm" style="color: var(--muted);">Não informado</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <span class="block text-[10px] font-medium uppercase tracking-wider mb-1"
+                        style="color: var(--muted);">Telefone</span>
+                    {% if contact.phone %}
+                    <a href="tel:{{ contact.phone }}" class="text-sm hover:underline flex items-center gap-1.5"
+                        style="color: var(--fg);">
+                        <span class="material-symbols-outlined text-[14px]" style="color: var(--muted);">call</span>
+                        {{ contact.phone }}
+                    </a>
+                    {% else %}
+                    <span class="text-sm" style="color: var(--muted);">Não informado</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Linha 3: Observações (Rich Text) -->
+            {% if contact.observations %}
+            <div class="h-px w-full" style="background: var(--border);"></div>
+            <div>
+                <span class="block text-[10px] font-medium uppercase tracking-wider mb-3"
+                    style="color: var(--muted);">Observações</span>
+                <div class="text-sm prose dark:prose-invert max-w-none" style="color: var(--fg);">
+                    {{ contact.observations|safe }}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

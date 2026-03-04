@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex items-start justify-between mb-8">
+    <div>
+        <h1 class="text-xl font-bold tracking-tight" style="color: var(--fg);">Log de Auditoria</h1>
+        <p class="text-xs mt-1" style="color: var(--muted);">Histórico de todas as ações realizadas pelos operadores.
+        </p>
+    </div>
+</div>
+
+{% if logs.items %}
+<div class="border overflow-hidden" style="border-color: var(--border);">
+    <table class="w-full text-xs">
+        <thead>
+            <tr class="border-b" style="border-color: var(--border); background: var(--surface);">
+                <th class="px-4 py-3 text-left font-medium" style="color: var(--muted);">Data / Hora</th>
+                <th class="px-4 py-3 text-left font-medium" style="color: var(--muted);">Operador</th>
+                <th class="px-4 py-3 text-left font-medium" style="color: var(--muted);">Ação</th>
+                <th class="px-4 py-3 text-left font-medium" style="color: var(--muted);">Detalhes</th>
+                <th class="px-4 py-3 text-left font-medium" style="color: var(--muted);">Alvo</th>
+                <th class="px-4 py-3 text-left font-medium" style="color: var(--muted);">ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs.items %}
+            <tr class="border-b hover:opacity-80 transition-opacity" style="border-color: var(--border);">
+                <td class="px-4 py-3 whitespace-nowrap" style="color: var(--muted);">
+                    {{ log.timestamp | brt }}
+                </td>
+                <td class="px-4 py-3 font-medium" style="color: var(--fg);">
+                    {{ log.user.username if log.user else '—' }}
+                </td>
+                <td class="px-4 py-3">
+                    {% if log.action == 'criou' %}
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-green-500/40 text-green-500">
+                        <span class="material-symbols-outlined text-[12px]">add_circle</span> criou
+                    </span>
+                    {% elif log.action == 'editou' %}
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-blue-500/40 text-blue-500">
+                        <span class="material-symbols-outlined text-[12px]">edit</span> editou
+                    </span>
+                    {% elif log.action == 'excluiu' %}
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-red-500/40 text-red-500">
+                        <span class="material-symbols-outlined text-[12px]">delete</span> excluiu
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border"
+                        style="border-color: var(--border); color: var(--muted);">
+                        <span class="material-symbols-outlined text-[12px]">settings</span> {{ log.action }}
+                    </span>
+                    {% endif %}
+                </td>
+                {% if log.details %}
+                <td class="px-4 py-3 whitespace-nowrap">
+                    {% set parts = log.details.split(' → ') %}
+                    {% if parts|length == 2 %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px]">
+                        <span class="px-1.5 py-0.5 border" style="border-color: var(--border); color: var(--muted);">{{
+                            parts[0] }}</span>
+                        <span class="material-symbols-outlined text-[12px]"
+                            style="color: var(--muted);">arrow_forward</span>
+                        <span class="px-1.5 py-0.5 border
+                            {% if parts[1] == 'Resolvido' %}border-green-500/40 text-green-500
+                            {% elif parts[1] == 'Aberto' %}border-blue-500/40 text-blue-500
+                            {% elif parts[1] == 'Aguardando Cliente' %}border-orange-500/40 text-orange-500
+                            {% elif parts[1] == 'Cancelado' %}border-gray-500/40 text-gray-400
+                            {% else %}border-gray-400/40{% endif %}">{{ parts[1] }}</span>
+                    </span>
+                    {% else %}
+                    <span class="text-[10px]" style="color: var(--muted);">{{ log.details }}</span>
+                    {% endif %}
+                </td>
+                {% else %}
+                <td class="px-4 py-3" style="color: var(--muted);">—</td>
+                {% endif %}
+                <td class="px-4 py-3" style="color: var(--fg);">{{ log.target_type }}</td>
+                <td class="px-4 py-3" style="color: var(--muted);">
+                    {% if log.target_type == 'Contact' and log.target_id %}
+                    <a href="{{ url_for('view_contact', contact_id=log.target_id) }}" target="_blank"
+                        class="hover:underline font-medium" style="color: var(--fg);">
+                        #{{ log.target_id }}
+                    </a>
+                    {% else %}
+                    {{ log.target_id or '—' }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+{% if logs.pages > 1 %}
+<div class="flex items-center justify-between mt-6">
+    <span class="text-xs" style="color: var(--muted);">Página {{ logs.page }} de {{ logs.pages }}</span>
+    <div class="flex gap-2">
+        {% if logs.has_prev %}
+        <a href="{{ url_for('audit_logs', page=logs.prev_num) }}"
+            class="px-3 py-1.5 border text-xs clip hover:opacity-70 transition-opacity"
+            style="border-color: var(--border); color: var(--fg);">← Anterior</a>
+        {% endif %}
+        {% if logs.has_next %}
+        <a href="{{ url_for('audit_logs', page=logs.next_num) }}"
+            class="px-3 py-1.5 border text-xs clip hover:opacity-70 transition-opacity"
+            style="border-color: var(--fg); color: var(--fg);">Próxima →</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="flex flex-col items-center justify-center py-20 border" style="border-color: var(--border);">
+    <span class="material-symbols-outlined text-[48px] mb-4" style="color: var(--muted);">shield</span>
+    <p class="text-sm font-medium" style="color: var(--fg);">Nenhuma atividade registrada ainda.</p>
+    <p class="text-xs mt-1" style="color: var(--muted);">As ações dos operadores aparecerão aqui.</p>
+</div>
+{% endif %}
+{% endblock %}

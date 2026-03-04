@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{{ title }} — MiniCRM</title>
+
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet" />
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: { display: ["JetBrains Mono", "monospace"] },
+                    borderRadius: { DEFAULT: "0rem", lg: "0rem", xl: "0rem", "2xl": "0rem", full: "9999px" },
+                    transitionDuration: { DEFAULT: "200ms" },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        :root {
+            --border: #e0e0e0;
+            --muted: #888888;
+            --fg: #111111;
+            --bg: #fafafa;
+            --surface: #f3f3f3;
+            --accent: #111111;
+        }
+
+        .dark {
+            --border: #2a2a2a;
+            --muted: #666666;
+            --fg: #f0f0f0;
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --accent: #f0f0f0;
+        }
+
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--muted);
+        }
+
+        select option {
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        .clip {
+            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+        }
+
+        .flash-neutral {
+            border-color: var(--border);
+            color: var(--muted);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+            line-height: 1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen antialiased">
+    <div class="max-w-[1200px] mx-auto px-5 lg:px-10">
+
+        <!-- Navbar -->
+        <header class="flex items-center justify-between h-14 border-b" style="border-color: var(--border);">
+            <a href="{{ url_for('index') }}"
+                class="flex items-center gap-2.5 hover:opacity-60 transition-opacity duration-200">
+                <div class="size-4 border-2" style="border-color: var(--fg);"></div>
+                <span class="text-sm font-bold tracking-tight" style="color: var(--fg);">MiniCRM</span>
+            </a>
+
+            <div class="flex items-center gap-5">
+                {% if current_user.is_authenticated %}
+                <nav class="hidden md:flex items-center gap-5">
+                    <a href="{{ url_for('index') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
+                        style="color: var(--fg);">Painel</a>
+                    {% if current_user.role == 'Gestor' %}
+                    <a href="{{ url_for('dashboard') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
+                        style="color: var(--muted);">Métricas</a>
+                    <a href="{{ url_for('audit_logs') }}"
+                        class="text-xs font-medium hover:opacity-60 transition-opacity"
+                        style="color: var(--muted);">Auditoria</a>
+                    <a href="{{ url_for('system_settings') }}"
+                        class="text-xs font-medium hover:opacity-60 transition-opacity"
+                        style="color: var(--muted);">Configurações</a>
+                    {% endif %}
+                    <a href="{{ url_for('import_csv') }}"
+                        class="text-xs font-medium hover:opacity-60 transition-opacity"
+                        style="color: var(--muted);">Importar</a>
+                </nav>
+
+                <div class="h-5 w-px" style="background: var(--border);"></div>
+
+                <div class="hidden sm:flex flex-col items-end">
+                    <span class="text-xs font-bold" style="color: var(--fg);">{{ current_user.username }}</span>
+                    <span class="text-[10px]" style="color: var(--muted);">{{ current_user.role }}</span>
+                </div>
+
+                <a href="{{ url_for('logout') }}"
+                    class="flex items-center gap-1.5 text-xs font-medium hover:opacity-60 transition-opacity"
+                    style="color: var(--muted);">
+                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                    <span class="hidden sm:inline">Sair</span>
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
+                    style="color: var(--muted);">Entrar</a>
+                <a href="{{ url_for('register') }}"
+                    class="px-3 py-1.5 border text-xs font-medium clip hover:opacity-70 transition-opacity"
+                    style="border-color: var(--fg); color: var(--fg);">Cadastrar</a>
+                {% endif %}
+
+                <!-- Toggle tema -->
+                <button onclick="
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.theme = isDark ? 'dark' : 'light';
+                document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
+            " class="flex items-center justify-center hover:opacity-50 transition-opacity" style="color: var(--muted);"
+                    title="Alternar tema">
+                    <span id="theme-icon" class="material-symbols-outlined text-[18px]">dark_mode</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flex flex-col gap-2 mt-5">
+            {% for category, message in messages %}
+            <div
+                class="flex items-center gap-3 px-4 py-3 text-xs border clip {% if category == 'error' %}border-red-500/40 text-red-500{% else %}flash-neutral{% endif %}">
+                <span class="material-symbols-outlined text-[14px]">{% if category == 'error' %}error{% else %}info{%
+                    endif %}</span>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <main class="py-10">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="border-t pb-6 pt-4 flex items-center justify-between" style="border-color: var(--border);">
+            <span class="text-[10px]" style="color: var(--muted);">MiniCRM</span>
+            <span class="text-[10px]" style="color: var(--muted);">v2.0</span>
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,387 @@
+:root {
+    /* Notion Color Palette (Clean, Minimalist, High Contrast) */
+    --primary-color: #2f3437; /* Notion Black */
+    --primary-hover: #1f2224;
+    --secondary-color: rgba(55, 53, 47, 0.08); /* Notion gentle hover */
+    --text-color: #37352f;
+    --light-text: rgba(55, 53, 47, 0.65);
+    --border-color: rgba(55, 53, 47, 0.16);
+    --bg-color: #ffffff;
+    --card-bg: #ffffff;
+    
+    /* WCAG compliant status badges */
+    --success-bg: #eaf1ed;
+    --success-text: #2f7a4e;
+    --warning-bg: #fbede3;
+    --warning-text: #b86214;
+    --info-bg: #e8f0fe;
+    --info-text: #1a5cbe;
+    
+    /* Error / Destructive */
+    --danger-color: #eb5757;
+    --danger-hover: #c94949;
+    --danger-bg: #ffebeb;
+
+    /* Highlight */
+    --overdue-bg: #ffeded;
+    
+    --radius: 4px; /* Notion uses very slight curves, almost square */
+    --shadow: none; /* Flat design */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    font-size: 15px; /* Standard Notion readability */
+}
+
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+/* Base Typo */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+    margin-bottom: 40px;
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-greeting {
+    color: var(--light-text);
+    font-size: 0.9rem;
+    margin-right: 12px;
+}
+
+/* Card / Flat Containers */
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color); /* Swap shadow for thin border */
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* Buttons (Ghost & Flat) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    padding: 6px 14px;
+    font-size: 0.95rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; /* Smooth Micro-interaction */
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-outline {
+    color: var(--text-color);
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Transparent ghost button similar to Notion top bar links */
+.btn-ghost {
+    color: var(--light-text);
+    background-color: transparent;
+    padding: 4px 8px;
+}
+
+.btn-ghost:hover {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+    background-color: var(--danger-hover);
+}
+
+.btn-danger-outline {
+    color: var(--danger-color);
+    background-color: transparent;
+    border-color: var(--border-color);
+}
+
+.btn-danger-outline:hover {
+    background-color: var(--danger-bg);
+    border-color: rgba(235, 87, 87, 0.4);
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+}
+
+.btn-block {
+    display: flex;
+    width: 100%;
+}
+
+/* Icons styling */
+.icon-sm {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    vertical-align: text-bottom;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--light-text);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    transition: border-color .15s ease, box-shadow .15s ease;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: rgba(47, 52, 55, 0.4);
+    box-shadow: 0 0 0 2px rgba(47, 52, 55, 0.1);
+}
+
+/* Auth Container */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 80px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 360px;
+    border: none;
+}
+
+.auth-card h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+/* Header & Filters */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    color: var(--light-text);
+    font-weight: 500;
+}
+
+.filter-group select.form-control, .filter-group input.form-control {
+    padding: 6px 10px;
+}
+
+/* Notion Style Table */
+.table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+    padding: 10px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.table th {
+    font-weight: 500;
+    color: var(--light-text);
+    background-color: #fbfbfc; /* Very slight gray for header */
+}
+
+/* Smooth row hover micro-interaction */
+.table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--secondary-color);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Badges (WCAG Compliant Contrast) */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 3px; /* Slightly squarish */
+}
+
+.badge-aberto {
+    background-color: var(--info-bg);
+    color: var(--info-text);
+}
+
+.badge-aguardando-cliente {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.badge-resolvido {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+}
+
+/* Highlights */
+.tr-overdue {
+    background-color: var(--overdue-bg) !important;
+}
+
+.overdue-warning {
+    margin-left: 6px;
+    color: var(--danger-color);
+}
+
+/* Flashes */
+.flashes {
+    margin-bottom: 24px;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
+    font-size: 0.95rem;
+    background-color: var(--secondary-color);
+}
+
+.alert-info {
+    border-left-color: var(--primary-color);
+}
+
+.empty-state {
+    padding: 60px 40px;
+    text-align: center;
+    color: var(--light-text);
+}
+
+.footer {
+    margin-top: 60px;
+    padding: 20px 0;
+    color: var(--light-text);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.current-page {
+    font-size: 0.9rem;
+    color: var(--light-text);
+}

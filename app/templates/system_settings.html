@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg">
+    <div class="mb-8">
+        <h1 class="text-xl font-bold tracking-tight" style="color: var(--fg);">Configurações</h1>
+        <p class="text-xs mt-1" style="color: var(--muted);">Parâmetros globais do sistema. Apenas Gestores podem
+            alterar.</p>
+    </div>
+
+    <div class="border p-6" style="border-color: var(--border);">
+        <form method="POST" action="{{ url_for('system_settings') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}" />
+
+            <div class="mb-6">
+                <label class="block text-xs font-medium mb-2" style="color: var(--fg);">
+                    <span class="material-symbols-outlined text-[14px] mr-1"
+                        style="vertical-align: middle;">notifications_active</span>
+                    Dias para Alerta de Inatividade
+                </label>
+                <p class="text-[11px] mb-3" style="color: var(--muted);">
+                    Clientes sem status "Resolvido" ou "Cancelado" criados há mais deste número de dias serão destacados
+                    como inativos no painel.
+                </p>
+                <div class="flex items-center gap-3">
+                    <input type="number" name="days_inactive_alert" id="days_inactive_alert" value="{{ days_inactive }}"
+                        min="1" max="365" class="w-24 px-3 py-2 border text-xs bg-transparent focus:outline-none"
+                        style="border-color: var(--border); color: var(--fg);" required />
+                    <span class="text-xs" style="color: var(--muted);">dias</span>
+                </div>
+            </div>
+
+            <div class="border-t pt-5" style="border-color: var(--border);">
+                <button type="submit"
+                    class="px-4 py-2 border text-xs font-medium clip hover:opacity-70 transition-opacity"
+                    style="border-color: var(--fg); color: var(--fg);">
+                    <span class="material-symbols-outlined text-[14px] mr-1" style="vertical-align: middle;">save</span>
+                    Salvar Configurações
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-6 border p-4" style="border-color: var(--border); background: var(--surface);">
+        <p class="text-[11px] font-medium mb-1" style="color: var(--fg);">Configuração atual</p>
+        <p class="text-[11px]" style="color: var(--muted);">
+            Alerta de inatividade ativo para contatos sem resposta há mais de
+            <strong style="color: var(--fg);">{{ days_inactive }} dias</strong>.
+        </p>
+    </div>
+</div>
+{% endblock %}

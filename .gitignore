@@ -1,0 +1,17 @@
+# Python / Flask
+venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+
+# Banco de dados local (Não queremos subir dados reais/testes pro GitHub)
+app.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# VS Code
+.vscode/

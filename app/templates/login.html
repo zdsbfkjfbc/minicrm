@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-xs mx-auto pt-6">
+    <div class="mb-8 text-center">
+        <div class="size-6 border-2 mx-auto mb-4" style="border-color: var(--fg);"></div>
+        <h1 class="text-lg font-bold" style="color: var(--fg);">MiniCRM</h1>
+        <p class="text-xs mt-1" style="color: var(--muted);">Acesse sua conta</p>
+    </div>
+
+    <div class="border clip" style="border-color: var(--border);">
+        <form action="" method="post" class="p-6 flex flex-col gap-5">
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.username.label(class="block text-[10px] font-medium uppercase tracking-widest mb-2",
+                style="color: var(--muted);") }}
+                {{ form.username(class="w-full h-9 px-3 border-b text-sm focus:outline-none transition-colors",
+                style="border-color: var(--border); background: transparent; color: var(--fg);",
+                placeholder="seu_usuário") }}
+            </div>
+
+            <div>
+                {{ form.password.label(class="block text-[10px] font-medium uppercase tracking-widest mb-2",
+                style="color: var(--muted);") }}
+                {{ form.password(class="w-full h-9 px-3 border-b text-sm focus:outline-none transition-colors",
+                style="border-color: var(--border); background: transparent; color: var(--fg);", placeholder="••••••••")
+                }}
+            </div>
+
+            <div class="flex items-center gap-2">
+                {{ form.remember_me(class="focus:outline-none", style="background: transparent;") }}
+                {{ form.remember_me.label(class="text-xs", style="color: var(--muted);") }}
+            </div>
+
+            <div class="pt-2 border-t" style="border-color: var(--border);">
+                {{ form.submit(class="w-full h-9 border text-xs font-bold clip cursor-pointer hover:opacity-70
+                transition-opacity", style="border-color: var(--fg); background: var(--fg); color: var(--bg);",
+                value="Entrar") }}
+            </div>
+        </form>
+    </div>
+
+    <p class="text-center text-xs mt-5" style="color: var(--muted);">
+        Sem conta?
+        <a href="{{ url_for('register') }}" class="font-bold hover:opacity-50 transition-opacity"
+            style="color: var(--fg);">Cadastrar</a>
+    </p>
+</div>
+
+{% endblock %}
