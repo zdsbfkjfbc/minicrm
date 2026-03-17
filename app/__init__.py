@@ -27,6 +27,7 @@ def create_app(config_class=Config):
 
     with app.app_context():
         from datetime import timezone, timedelta
+        from app.forms import LogoutForm
 
         @app.template_filter('brt')
         def to_brt(dt):
@@ -36,6 +37,10 @@ def create_app(config_class=Config):
             BRT = timezone(timedelta(hours=-3))
             dt_brt = dt.replace(tzinfo=timezone.utc).astimezone(BRT)
             return dt_brt.strftime('%d/%m/%Y %H:%M:%S')
+
+        @app.context_processor
+        def inject_logout_form():
+            return {'logout_form': LogoutForm()}
 
         from app import models, views
         

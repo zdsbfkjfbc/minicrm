@@ -43,3 +43,18 @@ Este é um Mini CRM simples(MVP) desenvolvido em Python e Flask com banco de dad
 - **Backend**: Python 3, Flask, Flask-SQLAlchemy, Flask-Login, Flask-WTF
 - **Banco de Dados**: SQLite
 - **Frontend**: HTML5, Jinja2, CSS3 (variáveis, flexbox), Google Fonts (Inter)
+
+## Automatização de commits
+Disponibilizamos `scripts/commit.ps1` para automatizar o fluxo estilo Big Tech (teste → staging → commit conforme convencional). Use assim:
+
+```powershell
+.\scripts\commit.ps1 -Type <feat|fix|docs|chore|refactor|test|ci|perf> -Scope <modulo?> -Summary "Breve descrição"
+```
+
+O script:
+
+1. Executa `python -m pytest -q tests` (usa `SECRET_KEY='test-secret'` no ambiente).
+2. Estagia tudo (`git add -A`).
+3. Cria o commit com mensagem no formato `tipo(escopo): resumo`.
+
+Se os testes falharem, o processo é abortado e o repositório permanece no estado anterior; assim você segura a qualidade antes de push.
