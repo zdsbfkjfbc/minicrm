@@ -1,328 +1,111 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<!-- Hero / Page title -->
-<div class="flex flex-wrap items-end justify-between gap-4 mb-10">
-    <div>
-        <h1 class="text-xl font-bold" style="color: var(--fg);">Atendimentos</h1>
-        <p class="text-xs mt-1" style="color: var(--muted);">{{ current_user.username }} · {{ current_user.role }}</p>
-    </div>
-    <div class="flex gap-2 items-center">
-        <!-- Exportar (dropdown) -->
-        <div class="relative" id="export-wrapper">
-            <button id="export-btn" onclick="document.getElementById('export-menu').classList.toggle('hidden')"
-                class="flex items-center gap-1.5 h-8 px-3 border text-xs font-medium clip hover:opacity-60 transition-opacity"
-                style="border-color: var(--border); color: var(--muted);">
-                <span class="material-symbols-outlined text-[14px]">download</span>
-                Exportar
-                <span class="material-symbols-outlined text-[12px]">expand_more</span>
-            </button>
-            <div id="export-menu" class="hidden absolute right-0 top-full mt-1 border clip z-50 min-w-[140px]"
-                style="background: var(--bg); border-color: var(--border);">
-                <a href="{{ url_for('export_contacts', fmt='csv', status=status_filter, search=search_query, sort=sort_by) }}"
-                    class="flex items-center gap-2 px-4 py-2.5 text-xs hover:opacity-60 transition-opacity"
-                    style="color: var(--fg);">
-                    <span class="material-symbols-outlined text-[14px]">table_view</span>
-                    Exportar CSV
-                </a>
-                <div class="h-px" style="background: var(--border);"></div>
-                <a href="{{ url_for('export_contacts', fmt='xlsx', status=status_filter, search=search_query, sort=sort_by) }}"
-                    class="flex items-center gap-2 px-4 py-2.5 text-xs hover:opacity-60 transition-opacity"
-                    style="color: var(--fg);">
-                    <span class="material-symbols-outlined text-[14px]">grid_on</span>
-                    Exportar Excel
-                </a>
-            </div>
+<div class="glass-panel">
+    <p class="hero-title">Atendimentos</p>
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; margin-top:10px;">
+        <p style="margin:0; color: var(--muted);">Olá, {{ current_user.username }} · {{ current_user.role }}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{{ url_for('import_csv') }}" class="btn-primary">Importar</a>
+            <a href="{{ url_for('new_contact') }}" class="btn-primary" style="background:#0f172a; border:1px solid var(--border); color:var(--fg);">Novo contato</a>
         </div>
-
-        <a href="{{ url_for('import_csv') }}"
-            class="flex items-center gap-1.5 h-8 px-3 border text-xs font-medium clip hover:opacity-60 transition-opacity"
-            style="border-color: var(--border); color: var(--muted);">
-            <span class="material-symbols-outlined text-[14px]">upload_file</span>
-            Importar
-        </a>
-        <a href="{{ url_for('new_contact') }}"
-            class="flex items-center gap-1.5 h-8 px-4 border text-xs font-bold clip hover:opacity-80 transition-opacity"
-            style="border-color: var(--fg); background: var(--fg); color: var(--bg);">
-            <span class="material-symbols-outlined text-[14px]">add</span>
-            Novo
-        </a>
     </div>
+    {% if metrics.inactive > 0 %}
+    <div class="flash-container" style="margin-top:20px;">
+        <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent);">notifications_active</span>
+        <span style="margin-left:10px; font-size:0.8rem;">{{ metrics.inactive }} clientes aguardando há {{ metrics.inactive_days }} dias sem resposta.</span>
+    </div>
+    {% endif %}
 </div>
 
-<script>
-    // Fechar dropdown ao clicar fora
-    document.addEventListener('click', function (e) {
-        var wrapper = document.getElementById('export-wrapper');
-        var menu = document.getElementById('export-menu');
-        if (wrapper && menu && !wrapper.contains(e.target)) {
-            menu.classList.add('hidden');
-        }
-    });
-</script>
-
-<!-- Métricas -->
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-10">
+<div class="stats-grid">
     {% for label, value, color in [
-    ('Total', metrics.total, ''),
-    ('Pendentes', metrics.pendentes, 'text-orange-500'),
-    ('Resolvidos', metrics.resolvidos, 'text-green-500'),
-    ('Em atraso', metrics.overdue, 'text-red-500'),
+        ('Total', metrics.total, ''),
+        ('Pendentes', metrics.pendentes, ''),
+        ('Resolvidos', metrics.resolvidos, ''),
+        ('Em atraso', metrics.overdue, ''),
     ] %}
-    <div class="border p-5 clip flex flex-col gap-4 hover:opacity-80 transition-opacity"
-        style="border-color: var(--border);">
-        <p class="text-[10px] font-medium uppercase tracking-widest" style="color: var(--muted);">{{ label }}</p>
-        <p class="text-3xl font-bold {% if color %}{{ color }}{% else %}text-[color:var(--fg)]{% endif %}">{{ value }}
-        </p>
+    <div class="metric-card">
+        <h3>{{ label }}</h3>
+        <div class="value" style="color: {% if label == 'Em atraso' %} #ff5d6c {% else %} var(--fg) {% endif %};">{{ value }}</div>
     </div>
     {% endfor %}
 </div>
 
-{% if metrics.inactive > 0 %}
-<div class="flex items-center gap-3 px-4 py-3 mb-6 border text-xs"
-    style="border-color: #f97316; color: #f97316; background: rgba(249,115,22,0.06);">
-    <span class="material-symbols-outlined text-[16px]">notifications_active</span>
-    <span>
-        <strong>{{ metrics.inactive }}</strong> cliente{{ 's' if metrics.inactive > 1 else '' }} aguardando contato há
-        mais de
-        <strong>{{ metrics.inactive_days }}</strong> dias sem resolução.
-        {% if current_user.role == 'Gestor' %}
-        <a href="{{ url_for('system_settings') }}" class="underline hover:opacity-70 transition-opacity ml-1">Ajustar
-            prazo</a>
-        {% endif %}
-    </span>
-</div>
-{% endif %}
-
-<!-- Conteúdo principal -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    <!-- Tabela -->
-    <div class="lg:col-span-2 border clip" style="border-color: var(--border);">
-        <!-- Filtros -->
-        <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b"
-            style="border-color: var(--border); background: var(--surface);">
-            <form method="get" action="{{ url_for('index') }}" class="flex items-center gap-2 flex-wrap w-full">
-                <div class="relative flex-1 min-w-[140px]">
-                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[13px]"
-                        style="color: var(--muted);">search</span>
-                    <input name="search" value="{{ search_query }}"
-                        class="w-full h-7 pl-7 pr-2 text-xs border focus:outline-none"
-                        style="border-color: var(--border); background: var(--bg); color: var(--fg);"
-                        placeholder="Buscar cliente..." onkeydown="if(event.key==='Enter')this.form.submit()" />
-                </div>
-                <select name="status" class="h-7 px-2 text-xs border focus:outline-none"
-                    style="border-color: var(--border); background: var(--bg); color: var(--fg);"
-                    onchange="this.form.submit()">
-                    <option value="Todos" {% if status_filter=='Todos' %}selected{% endif %}>Todos</option>
-                    <option value="Aberto" {% if status_filter=='Aberto' %}selected{% endif %}>Aberto</option>
-                    <option value="Aguardando Cliente" {% if status_filter=='Aguardando Cliente' %}selected{% endif %}>
-                        Aguardando</option>
-                    <option value="Resolvido" {% if status_filter=='Resolvido' %}selected{% endif %}>Resolvido</option>
-                    <option value="Cancelado" {% if status_filter=='Cancelado' %}selected{% endif %}>Cancelado</option>
-                </select>
-                <select name="sort" class="h-7 px-2 text-xs border focus:outline-none"
-                    style="border-color: var(--border); background: var(--bg); color: var(--fg);"
-                    onchange="this.form.submit()">
-                    <option value="deadline_asc" {% if sort_by=='deadline_asc' %}selected{% endif %}>Prazo ↑</option>
-                    <option value="deadline_desc" {% if sort_by=='deadline_desc' %}selected{% endif %}>Prazo ↓</option>
-                    <option value="created_desc" {% if sort_by=='created_desc' %}selected{% endif %}>Recentes</option>
-                </select>
-            </form>
+<div class="glass-panel" style="margin-top:24px;">
+    <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:24px;">
+        <form method="get" action="{{ url_for('index') }}" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+            <input name="search" value="{{ search_query }}" placeholder="Buscar cliente" style="border:1px solid var(--border); border-radius:12px; padding:10px 14px; background:transparent; color:var(--fg);" />
+            <select name="status" style="border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:transparent; color:var(--fg);">
+                <option value="Todos" {% if status_filter=='Todos' %}selected{% endif %}>Todos</option>
+                <option value="Aberto" {% if status_filter=='Aberto' %}selected{% endif %}>Aberto</option>
+                <option value="Aguardando Cliente" {% if status_filter=='Aguardando Cliente' %}selected{% endif %}>Aguardando</option>
+                <option value="Resolvido" {% if status_filter=='Resolvido' %}selected{% endif %}>Resolvido</option>
+                <option value="Cancelado" {% if status_filter=='Cancelado' %}selected{% endif %}>Cancelado</option>
+            </select>
+            <select name="sort" style="border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:transparent; color:var(--fg);">
+                <option value="deadline_asc" {% if sort_by=='deadline_asc' %}selected{% endif %}>Prazo ↑</option>
+                <option value="deadline_desc" {% if sort_by=='deadline_desc' %}selected{% endif %}>Prazo ↓</option>
+                <option value="created_desc" {% if sort_by=='created_desc' %}selected{% endif %}>Recentes</option>
+            </select>
+        </form>
+        <div style="margin-left:auto; display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="{{ url_for('export_contacts', fmt='csv', status=status_filter, search=search_query, sort=sort_by) }}" class="btn-primary" style="background:transparent; color:var(--accent); border:1px solid var(--border);">Exportar CSV</a>
+            <a href="{{ url_for('export_contacts', fmt='xlsx', status=status_filter, search=search_query, sort=sort_by) }}" class="btn-primary" style="background:transparent; color:var(--accent); border:1px solid var(--border);">Excel</a>
         </div>
+    </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left min-w-[400px]">
-                <thead>
-                    <tr class="border-b" style="border-color: var(--border); background: var(--surface);">
-                        <th class="px-5 py-3 text-[10px] font-medium uppercase tracking-widest"
-                            style="color: var(--muted);">Contato</th>
-                        {% if current_user.role == 'Gestor' %}<th
-                            class="px-5 py-3 text-[10px] font-medium uppercase tracking-widest"
-                            style="color: var(--muted);">Resp.</th>{% endif %}
-                        <th class="px-5 py-3 text-[10px] font-medium uppercase tracking-widest"
-                            style="color: var(--muted);">Status</th>
-                        <th class="px-5 py-3 text-[10px] font-medium uppercase tracking-widest"
-                            style="color: var(--muted);">Prazo</th>
-                        <th class="px-5 py-3 text-[10px] font-medium uppercase tracking-widest"
-                            style="color: var(--muted);">Obs.</th>
-                        <th class="px-5 py-3"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if contacts.items %}
-                    {% for contact in contacts.items %}
-                    <tr class="border-b group hover:opacity-80 transition-opacity" style="border-color: var(--border);">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <!-- Badge tipo: P = Pessoa, E = Empresa -->
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 border clip flex-shrink-0"
-                                    style="border-color: var(--muted); color: var(--muted);"
-                                    title="{{ contact.contact_type or 'Pessoa' }}">
-                                    {{ 'E' if contact.contact_type == 'Empresa' else 'P' }}
-                                </span>
-                                <div>
-                                    <a href="{{ url_for('view_contact', contact_id=contact.id) }}" target="_blank"
-                                        class="text-sm font-medium hover:underline block" style="color: var(--fg);">
-                                        {{ contact.customer_name }}
-                                    </a>
-                                    <div class="flex items-center gap-2 mt-0.5">
-                                        <span class="text-[10px]" style="color: var(--muted);">#{{ contact.id }}</span>
-                                        {% if contact.email %}
-                                        <a href="mailto:{{ contact.email }}"
-                                            class="flex items-center text-[10px] hover:opacity-60 transition-opacity"
-                                            style="color: var(--muted);" title="{{ contact.email }}">
-                                            <span class="material-symbols-outlined text-[12px]">mail</span>
-                                        </a>
-                                        {% endif %}
-                                        {% if contact.phone %}
-                                        <a href="tel:{{ contact.phone }}"
-                                            class="flex items-center text-[10px] hover:opacity-60 transition-opacity"
-                                            style="color: var(--muted);" title="{{ contact.phone }}">
-                                            <span class="material-symbols-outlined text-[12px]">call</span>
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        {% if current_user.role == 'Gestor' %}
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="size-5 border flex items-center justify-center text-[10px] font-bold clip"
-                                    style="border-color: var(--border); color: var(--fg);">
-                                    {{ contact.owner.username[0]|upper if contact.owner else '?' }}
-                                </div>
-                                <span class="text-xs" style="color: var(--muted);">{{ contact.owner.username if
-                                    contact.owner else '—' }}</span>
-                            </div>
-                        </td>
-                        {% endif %}
-                        <td class="px-5 py-4">
-                            {% if contact.status == 'Resolvido' %}
-                            <span
-                                class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium border border-green-500/50 text-green-600 dark:text-green-400">
-                                <span class="material-symbols-outlined text-[11px]">check</span>Resolvido
-                            </span>
-                            {% elif contact.status == 'Aguardando Cliente' %}
-                            <span
-                                class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium border border-orange-500/50 text-orange-600 dark:text-orange-400">
-                                <span class="material-symbols-outlined text-[11px]">schedule</span>Aguardando
-                            </span>
-                            {% elif contact.status == 'Cancelado' %}
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium border clip"
-                                style="border-color: var(--muted); color: var(--muted);">
-                                <span class="material-symbols-outlined text-[11px]">cancel</span>Cancelado
-                            </span>
-                            {% else %}
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium border clip"
-                                style="border-color: var(--border); color: var(--muted);">
-                                Aberto
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td class="px-5 py-4">
-                            {% if contact.deadline %}
-                            <span
-                                class="text-xs {% if contact.is_overdue() %}text-red-500{% else %}text-[color:var(--fg)]{% endif %}">
-                                {{ contact.deadline.strftime('%d/%m/%Y') }}
-                            </span>
-                            {% else %}
-                            <span class="text-xs" style="color: var(--muted);">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-5 py-4 text-xs max-w-[160px] truncate" style="color: var(--muted);"
-                            title="{{ contact.observations }}">
-                            {{ contact.observations or '—' }}
-                        </td>
-                        <td class="px-5 py-4">
-                            <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <a href="{{ url_for('view_contact', contact_id=contact.id) }}" target="_blank"
-                                    title="Visualizar" class="hover:opacity-50 transition-opacity"
-                                    style="color: var(--fg);">
-                                    <span class="material-symbols-outlined text-[16px]">visibility</span>
-                                </a>
-                                <a href="{{ url_for('edit_contact', contact_id=contact.id) }}" title="Editar"
-                                    class="hover:opacity-50 transition-opacity" style="color: var(--fg);">
-                                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                                </a>
-                                <form action="{{ url_for('delete_contact', contact_id=contact.id) }}" method="POST"
-                                    style="display:inline;" onsubmit="return confirm('Confirmar exclusão?');">
-                                    {{ delete_form.hidden_tag() }}
-                                    <button type="submit" class="text-red-500 hover:opacity-50 transition-opacity">
-                                        <span class="material-symbols-outlined text-[16px]">delete</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="px-5 py-12 text-center text-xs" style="color: var(--muted);">Nenhum
-                            registro encontrado.</td>
-                    </tr>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Contato</th>
+                    {% if current_user.role == 'Gestor' %}<th>Responsável</th>{% endif %}
+                    <th>Status</th>
+                    <th>Prazo</th>
+                    <th>Observações</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if contacts.items %}
+                {% for contact in contacts.items %}
+                <tr>
+                    <td>
+                        <strong>{{ contact.customer_name }}</strong>
+                        <div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">#{{ contact.id }}</div>
+                    </td>
+                    {% if current_user.role == 'Gestor' %}
+                    <td>{{ contact.owner.username if contact.owner else '—' }}</td>
                     {% endif %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Paginação -->
-        <div class="flex items-center justify-between px-5 py-3 border-t"
-            style="border-color: var(--border); background: var(--surface);">
-            <p class="text-[10px]" style="color: var(--muted);">Página {{ contacts.page }} de {{ contacts.pages }}</p>
-            <div class="flex gap-2">
-                {% if contacts.has_prev %}
-                <a href="{{ url_for('index', page=contacts.prev_num, status=status_filter, sort=sort_by, search=search_query) }}"
-                    class="px-3 py-1 border text-[10px] font-medium clip hover:opacity-60 transition-opacity"
-                    style="border-color: var(--border); color: var(--fg);">Anterior</a>
+                    <td><span class="highlight-pill">{{ contact.status }}</span></td>
+                    <td>
+                        {% if contact.deadline %}
+                        {{ contact.deadline.strftime('%d/%m/%Y') }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                    <td>{{ contact.observations or 'Nenhuma observação' }}</td>
+                    <td>
+                        <a href="{{ url_for('view_contact', contact_id=contact.id) }}" class="btn-primary" style="background:transparent; color:var(--fg); border:1px solid var(--border);">Ver</a>
+                    </td>
+                </tr>
+                {% endfor %}
                 {% else %}
-                <span class="px-3 py-1 border text-[10px] opacity-30 cursor-not-allowed"
-                    style="border-color: var(--border); color: var(--muted);">Anterior</span>
+                <tr>
+                    <td colspan="6" style="text-align:center; color:var(--muted); padding:28px;">Nenhum registro encontrado.</td>
+                </tr>
                 {% endif %}
-                {% if contacts.has_next %}
-                <a href="{{ url_for('index', page=contacts.next_num, status=status_filter, sort=sort_by, search=search_query) }}"
-                    class="px-3 py-1 border text-[10px] font-medium clip hover:opacity-60 transition-opacity"
-                    style="border-color: var(--border); color: var(--fg);">Próxima</a>
-                {% else %}
-                <span class="px-3 py-1 border text-[10px] opacity-30 cursor-not-allowed"
-                    style="border-color: var(--border); color: var(--muted);">Próxima</span>
-                {% endif %}
-            </div>
-        </div>
+            </tbody>
+        </table>
     </div>
 
-    <!-- Activity Log -->
-    <div class="border clip flex flex-col" style="border-color: var(--border);">
-        <div class="px-5 py-3 border-b" style="border-color: var(--border); background: var(--surface);">
-            <p class="text-xs font-medium" style="color: var(--fg);">Recentes</p>
-        </div>
-        <div class="flex flex-col divide-y flex-1" style="border-color: var(--border);">
-            {% if recent_contacts %}
-            {% for rc in recent_contacts %}
-            <div class="flex gap-3 items-start p-4 hover:opacity-70 transition-opacity">
-                <div class="mt-1 size-1.5 flex-shrink-0 rounded-full
-                    {% if rc.status == 'Resolvido' %}bg-green-500
-                    {% elif rc.status == 'Aguardando Cliente' %}bg-orange-500
-                    {% else %}bg-gray-400{% endif %}">
-                </div>
-                <div class="min-w-0">
-                    <p class="text-xs font-medium truncate" style="color: var(--fg);">{{ rc.customer_name }}</p>
-                    <p class="text-[10px] mt-0.5" style="color: var(--muted);">{{ rc.status }}</p>
-                </div>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="flex-1 flex items-center justify-center p-8">
-                <p class="text-[10px]" style="color: var(--muted);">Nenhum registro.</p>
-            </div>
-            {% endif %}
-        </div>
-        <div class="border-t p-4" style="border-color: var(--border);">
-            <a href="{{ url_for('index') }}" class="block text-center text-[10px] hover:opacity-50 transition-opacity"
-                style="color: var(--muted);">Ver todos</a>
-        </div>
+    <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:0.75rem; color:var(--muted);">
+        <span>Pág. {{ contacts.page }} / {{ contacts.pages }}</span>
+        <span>Total de {{ contacts.total }} registros</span>
     </div>
-
 </div>
+
 {% endblock %}

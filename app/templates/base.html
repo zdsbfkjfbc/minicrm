@@ -14,84 +14,147 @@
         }
     </script>
 
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet" />
-
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    fontFamily: { display: ["JetBrains Mono", "monospace"] },
-                    borderRadius: { DEFAULT: "0rem", lg: "0rem", xl: "0rem", "2xl": "0rem", full: "9999px" },
-                    transitionDuration: { DEFAULT: "200ms" },
-                },
-            },
-        };
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --border: #e0e0e0;
-            --muted: #888888;
-            --fg: #111111;
-            --bg: #fafafa;
-            --surface: #f3f3f3;
-            --accent: #111111;
+            --border: #d3d6dc;
+            --muted: #6c6f7a;
+            --fg: #111827;
+            --bg: #f8f9fb;
+            --surface: #ffffff;
+            --accent: #ff6b5f;
+            --glass: rgba(255, 255, 255, 0.6);
         }
 
         .dark {
-            --border: #2a2a2a;
-            --muted: #666666;
-            --fg: #f0f0f0;
-            --bg: #0a0a0a;
-            --surface: #141414;
-            --accent: #f0f0f0;
+            --border: #373c4a;
+            --muted: #a5abb8;
+            --fg: #f7f8fb;
+            --bg: #05060a;
+            --surface: #0f111a;
+            --accent: #ff9a7c;
+            --glass: rgba(20, 24, 42, 0.8);
         }
 
-        * {
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: var(--bg);
+            margin: 0;
+            font-family: 'Space Grotesk', 'JetBrains Mono', system-ui, sans-serif;
+            background: var(--bg);
             color: var(--fg);
+            min-height: 100vh;
         }
 
-        input,
-        select,
-        textarea,
-        button {
-            font-family: 'JetBrains Mono', monospace;
+        header, .glass-panel, table {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        input::placeholder,
-        textarea::placeholder {
+        header:hover, .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        .btn-primary {
+            font-family: 'Unbounded', 'Space Grotesk', sans-serif;
+            padding: 10px 20px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), #ff956b);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            box-shadow: 0 10px 20px rgba(255, 107, 95, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px) scale(1.01);
+        }
+
+        .glass-panel {
+            border-radius: 18px;
+            padding: 24px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 60px rgba(15,23,42,0.1);
+        }
+
+        .hero-title {
+            font-family: 'Unbounded', serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .metric-card {
+            border-radius: 14px;
+            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(15,23,42,0.05);
+        }
+
+        .metric-card h3 {
+            margin: 0;
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
             color: var(--muted);
         }
 
-        select option {
-            background-color: var(--bg);
-            color: var(--fg);
+        .metric-card .value {
+            margin-top: 12px;
+            font-size: 2.2rem;
+            font-weight: 600;
         }
 
-        .clip {
-            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 0.85rem;
         }
 
-        .flash-neutral {
-            border-color: var(--border);
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
             color: var(--muted);
         }
 
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-            line-height: 1;
+        .highlight-pill {
+            display: inline-flex;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-size: 0.7rem;
+        }
+
+        .flash-container {
+            margin: 24px 0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            background: var(--surface);
+        }
+
+        footer {
+            margin-top: 60px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--muted);
         }
     </style>
 </head>
