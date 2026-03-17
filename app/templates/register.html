@@ -1,70 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="max-w-xs mx-auto pt-6">
-    <div class="mb-8 text-center">
-        <div class="size-6 border-2 mx-auto mb-4" style="border-color: var(--fg);"></div>
-        <h1 class="text-lg font-bold" style="color: var(--fg);">Criar conta</h1>
-        <p class="text-xs mt-1" style="color: var(--muted);">Junte-se ao MiniCRM</p>
-    </div>
-
-    <div class="border clip" style="border-color: var(--border);">
-        <form action="" method="post" class="p-6 flex flex-col gap-5">
-            {{ form.hidden_tag() }}
-
-            <div>
-                {{ form.username.label(class="block text-[10px] font-medium uppercase tracking-widest mb-2",
-                style="color: var(--muted);") }}
-                {% if form.username.errors %}
-                {{ form.username(class="w-full h-9 px-3 border-b text-sm focus:outline-none", style="border-color:
-                #ef4444; background: transparent; color: var(--fg);") }}
-                <p class="text-red-500 text-[10px] mt-1">{% for e in form.username.errors %}{{ e }}{% endfor %}</p>
-                {% else %}
-                {{ form.username(class="w-full h-9 px-3 border-b text-sm focus:outline-none", style="border-color:
-                var(--border); background: transparent; color: var(--fg);") }}
-                {% endif %}
-            </div>
-
-            <div>
-                {{ form.password.label(class="block text-[10px] font-medium uppercase tracking-widest mb-2",
-                style="color: var(--muted);") }}
-                {% if form.password.errors %}
-                {{ form.password(class="w-full h-9 px-3 border-b text-sm focus:outline-none", style="border-color:
-                #ef4444; background: transparent; color: var(--fg);") }}
-                <p class="text-red-500 text-[10px] mt-1">{% for e in form.password.errors %}{{ e }}{% endfor %}</p>
-                {% else %}
-                {{ form.password(class="w-full h-9 px-3 border-b text-sm focus:outline-none", style="border-color:
-                var(--border); background: transparent; color: var(--fg);") }}
-                {% endif %}
-            </div>
-
-            <div>
-                {{ form.confirm_password.label(class="block text-[10px] font-medium uppercase tracking-widest mb-2",
-                style="color: var(--muted);") }}
-                {% if form.confirm_password.errors %}
-                {{ form.confirm_password(class="w-full h-9 px-3 border-b text-sm focus:outline-none",
-                style="border-color: #ef4444; background: transparent; color: var(--fg);") }}
-                <p class="text-red-500 text-[10px] mt-1">{% for e in form.confirm_password.errors %}{{ e }}{% endfor %}
-                </p>
-                {% else %}
-                {{ form.confirm_password(class="w-full h-9 px-3 border-b text-sm focus:outline-none",
-                style="border-color: var(--border); background: transparent; color: var(--fg);") }}
-                {% endif %}
-            </div>
-
-            <div class="pt-2 border-t" style="border-color: var(--border);">
-                {{ form.submit(class="w-full h-9 border text-xs font-bold clip cursor-pointer hover:opacity-70
-                transition-opacity", style="border-color: var(--fg); background: var(--fg); color: var(--bg);",
-                value="Cadastrar") }}
-            </div>
-        </form>
-    </div>
-
-    <p class="text-center text-xs mt-5" style="color: var(--muted);">
-        Já tem conta?
-        <a href="{{ url_for('login') }}" class="font-bold hover:opacity-50 transition-opacity"
-            style="color: var(--fg);">Entrar</a>
-    </p>
+<div class="glass-panel" style="max-width:480px; margin:0 auto;">
+    <p class="hero-title" style="margin:0;">Criar conta</p>
+    <p style="margin:6px 0 18px; color:var(--muted); font-size:0.85rem;">Acesso rápido ao MiniCRM</p>
+    <form action="" method="post" style="display:flex; flex-direction:column; gap:16px;">
+        {{ form.hidden_tag() }}
+        {% for field in [form.username, form.password, form.confirm_password] %}
+        <div style="display:flex; flex-direction:column; gap:6px;">
+            <label style="font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);">
+                {{ field.label.text }}
+            </label>
+            {{ field(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px 14px; background:#f9fafb;", autocomplete="off") }}
+            {% if field.errors %}
+            <p style="color:#ef4444; font-size:0.7rem;">{% for e in field.errors %}{{ e }} {% endfor %}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {{ form.submit(class="btn-pill btn-accent", value="Cadastrar") }}
+        <div style="text-align:center; font-size:0.8rem; color:var(--muted);">
+            Já tem conta?
+            <a href="{{ url_for('login') }}" style="color:var(--text); font-weight:600; text-decoration:none;">Entrar</a>
+        </div>
+    </form>
 </div>
 
 {% endblock %}
