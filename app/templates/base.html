@@ -134,12 +134,15 @@
                     <span class="text-[10px]" style="color: var(--muted);">{{ current_user.role }}</span>
                 </div>
 
-                <a href="{{ url_for('logout') }}"
+                <form action="{{ url_for('logout') }}" method="post"
                     class="flex items-center gap-1.5 text-xs font-medium hover:opacity-60 transition-opacity"
                     style="color: var(--muted);">
-                    <span class="material-symbols-outlined text-[16px]">logout</span>
-                    <span class="hidden sm:inline">Sair</span>
-                </a>
+                    {{ logout_form.hidden_tag() }}
+                    <button type="submit" class="flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">logout</span>
+                        <span class="hidden sm:inline">Sair</span>
+                    </button>
+                </form>
                 {% else %}
                 <a href="{{ url_for('login') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
                     style="color: var(--muted);">Entrar</a>

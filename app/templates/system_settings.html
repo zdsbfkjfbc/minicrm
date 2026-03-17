@@ -9,7 +9,7 @@
 
     <div class="border p-6" style="border-color: var(--border);">
         <form method="POST" action="{{ url_for('system_settings') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}" />
+            {{ form.hidden_tag() }}
 
             <div class="mb-6">
                 <label class="block text-xs font-medium mb-2" style="color: var(--fg);">
@@ -22,9 +22,7 @@
                     como inativos no painel.
                 </p>
                 <div class="flex items-center gap-3">
-                    <input type="number" name="days_inactive_alert" id="days_inactive_alert" value="{{ days_inactive }}"
-                        min="1" max="365" class="w-24 px-3 py-2 border text-xs bg-transparent focus:outline-none"
-                        style="border-color: var(--border); color: var(--fg);" required />
+                    {{ form.days_inactive_alert(class="w-24 px-3 py-2 border text-xs bg-transparent focus:outline-none", style="border-color: var(--border); color: var(--fg);", min="1", max="365") }}
                     <span class="text-xs" style="color: var(--muted);">dias</span>
                 </div>
             </div>

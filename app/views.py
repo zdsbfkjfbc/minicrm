@@ -1,16 +1,77 @@
-from flask import render_template, flash, redirect, url_for, request, Response
+from flask import render_template, flash, redirect, url_for, request, Response, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from app import db
 from app.models import User, Contact, AuditLog, SystemSettings
-from app.forms import LoginForm, ContactForm, RegistrationForm, ImportForm
+from app.forms import (ContactForm, DeleteContactForm, ImportForm,
+                       LoginForm, LogoutForm, RegistrationForm,
+                       SystemSettingsForm)
 from flask import current_app as app
 from sqlalchemy import desc, asc, func
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 import csv
 import io
 import re
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
+
+ALLOWED_STATUSES = {'Aberto', 'Aguardando Cliente', 'Resolvido', 'Cancelado'}
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_WINDOW_MINUTES = 15
+LOGIN_BLOCK_MINUTES = 15
+LOGIN_ATTEMPTS: dict[tuple[str, str], list[datetime]] = {}
+
+
+def _client_ip() -> str:
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.remote_addr or 'unknown'
+
+
+def _purge_old_attempts(now: datetime):
+    cutoff = now - timedelta(minutes=LOGIN_WINDOW_MINUTES)
+    for key in list(LOGIN_ATTEMPTS.keys()):
+        fresh = [ts for ts in LOGIN_ATTEMPTS[key] if ts >= cutoff]
+        if fresh:
+            LOGIN_ATTEMPTS[key] = fresh
+        else:
+            del LOGIN_ATTEMPTS[key]
+
+
+def _is_login_blocked(username: str) -> tuple[bool, int]:
+    now = datetime.now(timezone.utc)
+    _purge_old_attempts(now)
+    key = (_client_ip(), username.strip().lower())
+    attempts = LOGIN_ATTEMPTS.get(key, [])
+    if len(attempts) < MAX_LOGIN_ATTEMPTS:
+        return False, 0
+    first_attempt = attempts[0]
+    blocked_until = first_attempt + timedelta(minutes=LOGIN_BLOCK_MINUTES)
+    if blocked_until <= now:
+        LOGIN_ATTEMPTS.pop(key, None)
+        return False, 0
+    retry_seconds = int((blocked_until - now).total_seconds())
+    return True, max(retry_seconds, 1)
+
+
+def _register_login_failure(username: str):
+    now = datetime.now(timezone.utc)
+    _purge_old_attempts(now)
+    key = (_client_ip(), username.strip().lower())
+    LOGIN_ATTEMPTS.setdefault(key, []).append(now)
+
+
+def _clear_login_failures(username: str):
+    LOGIN_ATTEMPTS.pop((_client_ip(), username.strip().lower()), None)
+
+
+def sanitize_for_spreadsheet(value):
+    if not isinstance(value, str):
+        return value
+    stripped = value.lstrip()
+    if stripped.startswith(('=', '+', '-', '@')):
+        return f"'{value}"
+    return value
 
 def sanitize_html(text):
     if not text:
@@ -94,7 +155,7 @@ def index():
 
     # Inactive contacts alert
     inactive_days = int(get_setting('days_inactive_alert', '8'))
-    inactive_threshold = datetime.utcnow() - timedelta(days=inactive_days)
+    inactive_threshold = datetime.now(timezone.utc) - timedelta(days=inactive_days)
     inactive_count = base_query.filter(
         Contact.status.notin_(['Resolvido', 'Cancelado']),
         Contact.created_at <= inactive_threshold
@@ -109,7 +170,7 @@ def index():
         'inactive_days': inactive_days,
     }
 
-    return render_template('index.html', title='MiniCRM', contacts=contacts, status_filter=status_filter, sort_by=sort_by, search_query=search_query, metrics=metrics, recent_contacts=recent_contacts, inactive_days=inactive_days)
+    return render_template('index.html', title='MiniCRM', contacts=contacts, status_filter=status_filter, sort_by=sort_by, search_query=search_query, metrics=metrics, recent_contacts=recent_contacts, inactive_days=inactive_days, delete_form=DeleteContactForm())
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -117,11 +178,19 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
+        blocked, retry_seconds = _is_login_blocked(form.username.data)
+        if blocked:
+            retry_minutes = max(1, retry_seconds // 60)
+            flash(f'Muitas tentativas de login. Tente novamente em aproximadamente {retry_minutes} minuto(s).', 'error')
+            return redirect(url_for('login'))
+
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
+            _register_login_failure(form.username.data)
             app.logger.warning(f"Tentativa de login falha para o usuário: {form.username.data}")
             flash('Usuário ou senha inválidos.')
             return redirect(url_for('login'))
+        _clear_login_failures(form.username.data)
         login_user(user, remember=form.remember_me.data)
         app.logger.info(f"Login bem-sucedido: {user.username}")
         return redirect(url_for('index'))
@@ -133,7 +202,7 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, role=form.role.data)
+        user = User(username=form.username.data, role='Operador')
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -241,10 +310,15 @@ def dashboard():
                            op_colors=op_colors,
                            sla_rate=sla_rate)
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
+@login_required
 def logout():
+    form = LogoutForm()
+    if not form.validate_on_submit():
+        flash('Requisição inválida.', 'error')
+        return redirect(url_for('index'))
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @app.route('/contact/new', methods=['GET', 'POST'])
 @login_required
@@ -310,6 +384,9 @@ def edit_contact(contact_id):
 @app.route('/contact/<int:contact_id>/delete', methods=['POST'])
 @login_required
 def delete_contact(contact_id):
+    form = DeleteContactForm()
+    if not form.validate_on_submit():
+        abort(400)
     contact = _get_contact_or_404(contact_id)
     contact_id_log = contact.id
     record_audit('excluiu', 'Contact', contact_id_log)
@@ -365,15 +442,15 @@ def export_contacts(fmt):
     def row_data(c):
         return [
             c.id,
-            c.contact_type or 'Pessoa',
-            c.customer_name,
-            c.email or '',
-            c.phone or '',
-            c.status,
-            c.owner.username if c.owner else '',
-            c.deadline.strftime('%d/%m/%Y') if c.deadline else '',
-            c.observations or '',
-            fmt_dt(c.created_at),
+            sanitize_for_spreadsheet(c.contact_type or 'Pessoa'),
+            sanitize_for_spreadsheet(c.customer_name),
+            sanitize_for_spreadsheet(c.email or ''),
+            sanitize_for_spreadsheet(c.phone or ''),
+            sanitize_for_spreadsheet(c.status),
+            sanitize_for_spreadsheet(c.owner.username if c.owner else ''),
+            sanitize_for_spreadsheet(c.deadline.strftime('%d/%m/%Y') if c.deadline else ''),
+            sanitize_for_spreadsheet(c.observations or ''),
+            sanitize_for_spreadsheet(fmt_dt(c.created_at)),
         ]
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
@@ -480,7 +557,7 @@ def export_metrics(fmt):
         writer.writerow([])
         writer.writerow(['Operador', 'Abertos', 'Aguardando', 'Resolvidos', 'Cancelados'])
         for row in op_rows:
-            writer.writerow(row)
+            writer.writerow([sanitize_for_spreadsheet(row[0]), *row[1:]])
         output.seek(0)
         return Response(
             output.getvalue().encode('utf-8-sig'),
@@ -700,15 +777,15 @@ def export_bi():
     for c in contacts:
         writer.writerow([
             c.id,
-            c.contact_type or 'Pessoa',
-            c.customer_name,
-            c.email or '',
-            c.phone or '',
-            c.status,
-            c.owner.username if c.owner else '',
-            c.deadline.strftime('%Y-%m-%d') if c.deadline else '',
-            c.observations or '',
-            fmt_dt(c.created_at),
+            sanitize_for_spreadsheet(c.contact_type or 'Pessoa'),
+            sanitize_for_spreadsheet(c.customer_name),
+            sanitize_for_spreadsheet(c.email or ''),
+            sanitize_for_spreadsheet(c.phone or ''),
+            sanitize_for_spreadsheet(c.status),
+            sanitize_for_spreadsheet(c.owner.username if c.owner else ''),
+            sanitize_for_spreadsheet(c.deadline.strftime('%Y-%m-%d') if c.deadline else ''),
+            sanitize_for_spreadsheet(c.observations or ''),
+            sanitize_for_spreadsheet(fmt_dt(c.created_at)),
             '1' if c.is_overdue() else '0',
         ])
     output.seek(0)
@@ -739,28 +816,32 @@ def system_settings():
         flash('Acesso negado. Apenas Gestores podem acessar as configurações.')
         return redirect(url_for('index'))
 
-    if request.method == 'POST':
-        days_value = request.form.get('days_inactive_alert', '8').strip()
-        if not days_value.isdigit() or int(days_value) < 1:
-            flash('Valor inválido. Insira um número inteiro positivo.', 'error')
+    form = SystemSettingsForm()
+    days_inactive = get_setting('days_inactive_alert', '8')
+    if request.method == 'GET':
+        try:
+            form.days_inactive_alert.data = int(days_inactive)
+        except ValueError:
+            form.days_inactive_alert.data = 8
+
+    if form.validate_on_submit():
+        days_value = str(form.days_inactive_alert.data)
+        setting = SystemSettings.query.filter_by(key='days_inactive_alert').first()
+        if setting:
+            setting.value = days_value
         else:
-            setting = SystemSettings.query.filter_by(key='days_inactive_alert').first()
-            if setting:
-                setting.value = days_value
-            else:
-                setting = SystemSettings(
-                    key='days_inactive_alert',
-                    value=days_value,
-                    description='Número de dias sem atividade para gerar alerta de inatividade'
-                )
-                db.session.add(setting)
-            record_audit('alterou configuração', 'SystemSettings', None)
-            db.session.commit()
-            flash('Configurações salvas com sucesso!')
+            setting = SystemSettings(
+                key='days_inactive_alert',
+                value=days_value,
+                description='Número de dias sem atividade para gerar alerta de inatividade'
+            )
+            db.session.add(setting)
+        record_audit('alterou configuração', 'SystemSettings', None)
+        db.session.commit()
+        flash('Configurações salvas com sucesso!')
         return redirect(url_for('system_settings'))
 
-    days_inactive = get_setting('days_inactive_alert', '8')
-    return render_template('system_settings.html', title='Configurações', days_inactive=days_inactive)
+    return render_template('system_settings.html', title='Configurações', days_inactive=days_inactive, form=form)
 
 
 @app.route('/import', methods=['GET', 'POST'])
@@ -794,7 +875,7 @@ def import_csv():
                 
                 # Default values normalization for status
                 status_capitalized = status.title()
-                if status_capitalized not in ['Aberto', 'Aguardando Cliente', 'Resolvido']:
+                if status_capitalized not in ALLOWED_STATUSES:
                     status_capitalized = 'Aberto' # Fallback
                 
                 # Parse date

@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField, DateField
-from wtforms.validators import DataRequired, EqualTo, ValidationError, Length, Email, Optional
+from wtforms import (BooleanField, DateField, IntegerField, PasswordField,
+                     SelectField, StringField, SubmitField, TextAreaField)
+from wtforms.validators import (DataRequired, EqualTo, Email, Length,
+                                NumberRange, Optional, ValidationError)
 from app.models import User
 from datetime import date
 import re
@@ -16,7 +18,6 @@ class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, message='A senha deve ter pelo menos 8 caracteres.')])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='As senhas devem ser iguais.')])
-    role = SelectField('Perfil', choices=[('Operador', 'Operador'), ('Gestor', 'Gestor')], validators=[DataRequired()])
     submit = SubmitField('Cadastrar')
 
     def validate_username(self, username):
@@ -56,3 +57,17 @@ class ImportForm(FlaskForm):
         FileAllowed(['csv'], 'Apenas arquivos .csv são permitidos.')
     ])
     submit = SubmitField('Importar Dados')
+
+
+class LogoutForm(FlaskForm):
+    submit = SubmitField('Sair')
+
+
+class DeleteContactForm(FlaskForm):
+    submit = SubmitField('Excluir')
+
+
+class SystemSettingsForm(FlaskForm):
+    days_inactive_alert = IntegerField('Dias para alerta',
+                                       validators=[DataRequired(), NumberRange(min=1, max=365)])
+    submit = SubmitField('Salvar Configurações')

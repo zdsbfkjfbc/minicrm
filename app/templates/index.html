@@ -248,6 +248,7 @@
                                 </a>
                                 <form action="{{ url_for('delete_contact', contact_id=contact.id) }}" method="POST"
                                     style="display:inline;" onsubmit="return confirm('Confirmar exclusão?');">
+                                    {{ delete_form.hidden_tag() }}
                                     <button type="submit" class="text-red-500 hover:opacity-50 transition-opacity">
                                         <span class="material-symbols-outlined text-[16px]">delete</span>
                                     </button>

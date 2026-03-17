@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,7 +32,7 @@ class Contact(db.Model):
     status = db.Column(db.String(64), index=True, default='Aberto')
     deadline = db.Column(db.Date, nullable=True)
     observations = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
@@ -59,7 +59,7 @@ class AuditLog(db.Model):
     target_type = db.Column(db.String(64), nullable=False)
     target_id = db.Column(db.Integer, nullable=True)
     details = db.Column(db.Text, nullable=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=lambda: datetime.now(timezone.utc))
     
     user = db.relationship('User', backref='audit_logs')
 
