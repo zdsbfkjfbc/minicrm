@@ -1,79 +1,72 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="mb-6 flex items-center gap-3">
-    <a href="{{ url_for('index') }}"
-        class="text-[10px] font-medium border px-2 py-1 clip hover:opacity-50 transition-opacity"
-        style="border-color: var(--border); color: var(--muted);">← Voltar</a>
-    <h1 class="text-lg font-bold" style="color: var(--fg);">Importar via CSV</h1>
-</div>
+<section class="page-shell">
+    <header class="section-heading">
+        <p class="eyebrow">Dados</p>
+        <h1>Importar via CSV</h1>
+        <p>Centralize contatos com um upload rápido e formatos validados.</p>
+    </header>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Upload -->
-    <div class="border clip" style="border-color: var(--border);">
-        <div class="px-5 py-3 border-b" style="border-color: var(--border); background: var(--surface);">
-            <p class="text-[10px] font-medium uppercase tracking-widest" style="color: var(--muted);">Arquivo</p>
-        </div>
-        <form action="" method="POST" enctype="multipart/form-data" class="p-6 flex flex-col gap-5">
-            {{ form.hidden_tag() }}
+    <div class="panel-grid">
+        <article class="panel-card">
+            <div>
+                <p class="panel-title">Upload seguro</p>
+                <p class="panel-subtitle">Envie um .csv com as colunas esperadas em até 5 MB.</p>
+            </div>
+            <form action="" method="POST" enctype="multipart/form-data" class="form-panel">
+                {{ form.hidden_tag() }}
+                <label for="{{ form.csv_file.id }}" class="file-drop">
+                    <span class="material-symbols-outlined upload-icon">file_upload</span>
+                    <p class="file-helper" id="file-name-display">Clique ou arraste o arquivo .csv</p>
+                    {{ form.csv_file(class="hidden", accept=".csv") }}
+                </label>
+                {% if form.csv_file.errors %}
+                <p class="helper-stack upload-error">{% for e in form.csv_file.errors %}{{ e }}{% endfor %}</p>
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-block">
+                    Importar dados
+                </button>
+            </form>
+        </article>
 
-            <label for="{{ form.csv_file.id }}"
-                class="flex flex-col items-center justify-center h-36 border border-dashed cursor-pointer hover:opacity-60 transition-opacity"
-                style="border-color: var(--border);">
-                <span class="material-symbols-outlined text-[32px] mb-2" style="color: var(--muted);">file_upload</span>
-                <p class="text-xs" style="color: var(--muted);" id="file-name-display">Selecionar arquivo .csv</p>
-                {{ form.csv_file(class="hidden", accept=".csv") }}
-            </label>
-            {% if form.csv_file.errors %}
-            <p class="text-red-500 text-[10px]">{% for e in form.csv_file.errors %}{{ e }}{% endfor %}</p>
-            {% endif %}
-
-            {{ form.submit(class="w-full h-9 border text-xs font-bold clip cursor-pointer hover:opacity-70
-            transition-opacity", style="border-color: var(--fg); background: var(--fg); color: var(--bg);",
-            value="Importar dados") }}
-        </form>
-    </div>
-
-    <!-- Instruções -->
-    <div class="border clip" style="border-color: var(--border);">
-        <div class="px-5 py-3 border-b" style="border-color: var(--border); background: var(--surface);">
-            <p class="text-[10px] font-medium uppercase tracking-widest" style="color: var(--muted);">Formato esperado
-            </p>
-        </div>
-        <div class="p-5 flex flex-col gap-4">
-            <div class="border overflow-hidden" style="border-color: var(--border);">
-                <table class="w-full text-left text-[10px]">
+        <article class="panel-card">
+            <div>
+                <p class="panel-title">Formato esperado</p>
+                <p class="panel-subtitle">Exemplo ideal para garantir ingestão certeira.</p>
+            </div>
+            <div class="table-responsive">
+                <table class="mini-table">
                     <thead>
-                        <tr style="background: var(--surface);">
-                            <th class="px-3 py-2 font-bold" style="color: var(--fg);">Cliente</th>
-                            <th class="px-3 py-2 font-bold" style="color: var(--fg);">Status</th>
-                            <th class="px-3 py-2 font-bold" style="color: var(--fg);">Data Limite</th>
-                            <th class="px-3 py-2 font-bold" style="color: var(--fg);">Observações</th>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Data limite</th>
+                            <th>Observações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-t" style="border-color: var(--border);">
-                            <td class="px-3 py-2" style="color: var(--muted);">Maria Souza</td>
-                            <td class="px-3 py-2" style="color: var(--muted);">Aberto</td>
-                            <td class="px-3 py-2" style="color: var(--muted);">2026-12-31</td>
-                            <td class="px-3 py-2" style="color: var(--muted);">Teste</td>
+                        <tr>
+                            <td>Maria Souza</td>
+                            <td>Aberto</td>
+                            <td>2026-12-31</td>
+                            <td>Teste de importação</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="flex flex-col gap-2 text-[10px]" style="color: var(--muted);">
-                <p><span class="font-bold" style="color: var(--fg);">Status aceitos:</span> Aberto, Aguardando Cliente,
-                    Resolvido</p>
-                <p><span class="font-bold" style="color: var(--fg);">Formato de data:</span> AAAA-MM-DD</p>
-                <p><span class="font-bold" style="color: var(--fg);">Responsável:</span> {{ current_user.username }}</p>
+            <div class="helper-stack">
+                <p><strong>Status aceitos:</strong> Aberto, Aguardando Cliente, Resolvido</p>
+                <p><strong>Formato de data:</strong> AAAA-MM-DD</p>
+                <p><strong>Responsável:</strong> {{ current_user.username }}</p>
             </div>
-        </div>
+        </article>
     </div>
-</div>
+</section>
 
 <script>
     document.getElementById('{{ form.csv_file.id }}').addEventListener('change', function (e) {
-        document.getElementById('file-name-display').textContent = e.target.files[0] ? e.target.files[0].name : 'Selecionar arquivo .csv';
+        document.getElementById('file-name-display').textContent = e.target.files[0] ? e.target.files[0].name : 'Clique ou arraste o arquivo .csv';
     });
 </script>
 

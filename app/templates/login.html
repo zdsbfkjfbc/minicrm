@@ -1,29 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="glass-panel" style="max-width:420px; margin:0 auto;">
-    <p class="hero-title" style="margin:0 0 6px;">Login</p>
-    <p style="margin:0 0 18px; color:var(--muted); font-size:0.85rem;">Entre com sua conta corporativa</p>
+<section class="page-shell">
+    <header class="section-heading">
+        <p class="eyebrow">Acesso Seguro</p>
+        <h1>Entrar</h1>
+        <p>Use sua conta corporativa para acessar o MiniCRM e acompanhar atendimentos.</p>
+    </header>
 
-    <form action="" method="post" style="display:flex; flex-direction:column; gap:16px;">
-        {{ form.hidden_tag() }}
-        <div>
-            <span class="text-xs" style="letter-spacing:0.3em; text-transform:uppercase; color:var(--muted);">Usuário</span>
-            {{ form.username(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px 14px; background:#f9fafb; margin-top:6px;") }}
-        </div>
-        <div>
-            <span class="text-xs" style="letter-spacing:0.3em; text-transform:uppercase; color:var(--muted);">Senha</span>
-            {{ form.password(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px 14px; background:#f9fafb; margin-top:6px;") }}
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--muted);">
-            <label style="display:flex; align-items:center; gap:6px;">
-                {{ form.remember_me(class="mr-1") }}
-                Lembrar-me
-            </label>
-            <a href="{{ url_for('register') }}" style="font-weight:600; color:var(--text); text-decoration:none;">Criar conta</a>
-        </div>
-        {{ form.submit(class="btn-pill btn-accent", value="Entrar") }}
-    </form>
-</div>
+    <article class="panel-card auth-panel auth-panel-compact">
+        <form action="" method="post" class="form-panel">
+            {{ form.hidden_tag() }}
+            <div>
+                <label class="form-label">Usuário</label>
+                {{ form.username(class="input-control") }}
+            </div>
+            <div>
+                <label class="form-label">Senha</label>
+                {{ form.password(class="input-control") }}
+            </div>
+            <div class="auth-remember-row">
+                <label class="auth-remember">
+                    {{ form.remember_me(class="mr-1") }}
+                    Lembrar-me
+                </label>
+                <a href="{{ url_for('register') }}" class="secondary-link">Criar conta</a>
+            </div>
+            <div class="panel-footer">
+                {{ form.submit(class="btn btn-accent btn-block", value="Entrar") }}
+            </div>
+        </form>
+        <p class="helper-stack auth-helper">
+            Usuário padrão: <strong>admin</strong> | Senha: <strong>admin</strong>
+        </p>
+    </article>
+</section>
 
 {% endblock %}

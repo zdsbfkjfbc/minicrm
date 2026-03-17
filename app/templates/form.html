@@ -1,53 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="glass-panel" style="max-width:760px; margin:0 auto;">
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
-        <div>
-            <p class="hero-title" style="margin:0;">{{ legend }}</p>
-            <span style="font-size:0.75rem; letter-spacing:0.25em; color:var(--muted);">Atualize o contato cuidadosamente</span>
+<section class="page-shell">
+    <header class="section-heading">
+        <p class="eyebrow">Cadastro</p>
+        <h1>{{ legend }}</h1>
+        <p>Atualize ou crie contatos com atenção aos detalhes e SLA.</p>
+    </header>
+
+    <div class="panel-card form-panel">
+        <div class="section-row-between-wide">
+            <div>
+                <p class="panel-title">{{ legend }}</p>
+                <p class="panel-subtitle">Grave informações consistentes sobre cada contato.</p>
+            </div>
+            <a href="{{ url_for('index') }}" class="back-link">
+                <span class="material-symbols-outlined icon-inline-sm">arrow_back</span>
+                Voltar
+            </a>
         </div>
-        <a href="{{ url_for('index') }}" class="btn-pill btn-secondary" style="padding:8px 14px;">Voltar</a>
+
+        <form method="POST" class="form-panel">
+            {{ form.hidden_tag() }}
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Tipo</label>
+                    {{ form.contact_type(class="select-control") }}
+                </div>
+                <div class="span-two">
+                    <label class="form-label">Cliente</label>
+                    {{ form.customer_name(class="input-control") }}
+                </div>
+                <div>
+                    <label class="form-label">E-mail</label>
+                    {{ form.email(class="input-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Telefone</label>
+                    {{ form.phone(class="input-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Status</label>
+                    {{ form.status(class="select-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Data limite</label>
+                    {{ form.deadline(class="input-control") }}
+                    {% if form.deadline.errors %}
+                    <p class="helper-stack error-text">
+                        {{ form.deadline.errors[0] }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Observações</label>
+                {{ form.observations(class="textarea-control") }}
+            </div>
+
+            <div class="panel-footer">
+                {{ form.submit(class="btn btn-accent btn-block", value="Salvar") }}
+            </div>
+        </form>
     </div>
-    <form method="POST" class="glass-panel" style="margin-top:20px; padding:20px; background:#fdfdfd; border:none;">
-        {{ form.hidden_tag() }}
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
-            <div>
-                {{ form.contact_type.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-                {{ form.contact_type(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px; background:#fbfbff;") }}
-            </div>
-            <div style="grid-column:span 2;">
-                {{ form.customer_name.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-                {{ form.customer_name(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px; background:#fbfbff;") }}
-            </div>
-            <div>
-                {{ form.email.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-                {{ form.email(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px; background:#fbfbff;") }}
-            </div>
-            <div>
-                {{ form.phone.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-                {{ form.phone(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px; background:#fbfbff;") }}
-            </div>
-            <div>
-                {{ form.status.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-                {{ form.status(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px; background:#fbfbff;") }}
-            </div>
-            <div>
-                {{ form.deadline.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-                {{ form.deadline(class="w-full", style="border:1px solid var(--border); border-radius:10px; padding:10px; background:#fbfbff;") }}
-                {% if form.deadline.errors %}
-                <p style="margin:4px 0 0; color:#ef4444; font-size:0.75rem;">{{ form.deadline.errors[0] }}</p>
-                {% endif %}
-            </div>
-        </div>
-        <div style="margin-top:16px;">
-            {{ form.observations.label(style="display:block; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);") }}
-            {{ form.observations(class="w-full", style="border:1px solid var(--border); border-radius:12px; padding:12px; min-height:120px; background:#fbfbff;") }}
-        </div>
-        <div style="margin-top:18px;">
-            {{ form.submit(class="btn-pill btn-accent", value="Salvar") }}
-        </div>
-    </form>
-</div>
+</section>
 
 {% endblock %}

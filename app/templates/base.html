@@ -16,16 +16,17 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --page-bg: #f4f5f7;
-            --panel-bg: #ffffff;
-            --border: #e3e6ee;
-            --text: #111827;
-            --muted: #6b7280;
-            --accent: #ff6b2f;
-            --card-shadow: 0 25px 40px rgba(15, 23, 42, 0.08);
+            --page-bg: var(--bg-color, #f4f5f7);
+            --panel-bg: var(--card-bg, #ffffff);
+            --border: var(--border-color, #e3e6ee);
+            --text: var(--text-color, #111827);
+            --muted: var(--light-text, #6b7280);
+            --accent: var(--primary-color, #ff6b2f);
+            --card-shadow: none;
+            --glass-bg: var(--header-glass, rgba(255, 255, 255, 0.75));
         }
 
         *, *::before, *::after {
@@ -53,9 +54,12 @@
             gap: 12px;
             padding: 20px 28px;
             border-radius: 14px;
-            background: var(--panel-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border);
             box-shadow: var(--card-shadow);
+            transition: background 0.3s ease;
         }
 
         .brand-mark {
@@ -86,8 +90,8 @@
             padding-bottom: 4px;
         }
 
-        .identity {
-            display: flex;
+            .identity {
+                display: flex;
             flex-direction: column;
             align-items: flex-end;
             gap: 4px;
@@ -104,13 +108,17 @@
             font-family: 'Inter', sans-serif;
             border: none;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .btn-pill:active {
+            transform: scale(0.96);
         }
 
         .btn-accent {
             background: var(--accent);
-            color: #fff;
-            box-shadow: 0 12px 30px rgba(255, 107, 47, 0.4);
+            color: var(--bg-color);
+            box-shadow: none;
         }
 
         .btn-secondary {
@@ -194,14 +202,6 @@
             border-top: 1px solid var(--border);
         }
 
-        .highlight-pill {
-            padding: 4px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 107, 47, 0.4);
-            color: var(--accent);
-            font-size: 0.65rem;
-        }
-
         footer {
             text-align: center;
             margin-top: 40px;
@@ -210,10 +210,10 @@
             letter-spacing: 0.2em;
         }
 
-        @media (max-width: 800px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
+            @media (max-width: 800px) {
+                header {
+                    flex-direction: column;
+                    align-items: flex-start;
             }
 
             .identity {
@@ -221,38 +221,47 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.10">
 </head>
 
-<body class="min-h-screen antialiased">
-    <div class="main-wrapper">
+<body class="{{ body_class | default('min-h-screen antialiased') }}">
+    <div class="main-wrapper {{ 'auth-shell-wrapper' if hide_nav | default(false) else '' }}">
 
         <!-- Navbar -->
+        {% if not hide_nav | default(false) %}
         <header>
+            {% set active_endpoint = current_endpoint or request.endpoint %}
             <div class="brand-mark">MiniCRM</div>
             <nav>
-                <a href="{{ url_for('index') }}" class="active">Painel</a>
+                <a href="{{ url_for('index') }}" class="{{ 'active' if active_endpoint == 'index' else '' }}">Painel</a>
                 {% if current_user.is_authenticated and current_user.role == 'Gestor' %}
-                <a href="{{ url_for('dashboard') }}">Métricas</a>
-                <a href="{{ url_for('audit_logs') }}">Auditoria</a>
-                <a href="{{ url_for('system_settings') }}">Configurações</a>
+                <a href="{{ url_for('dashboard') }}" class="{{ 'active' if active_endpoint == 'dashboard' else '' }}">Métricas</a>
+                <a href="{{ url_for('audit_logs') }}" class="{{ 'active' if active_endpoint == 'audit_logs' else '' }}">Auditoria</a>
+                <a href="{{ url_for('system_settings') }}" class="{{ 'active' if active_endpoint == 'system_settings' else '' }}">Configurações</a>
                 {% endif %}
-                <a href="{{ url_for('import_csv') }}">Importar</a>
+                <a href="{{ url_for('import_csv') }}" class="{{ 'active' if active_endpoint == 'import_csv' else '' }}">Importar</a>
             </nav>
-            <div class="identity">
-                {% if current_user.is_authenticated %}
-                <span>{{ current_user.username }}</span>
-                <span>{{ current_user.role }}</span>
-                <form action="{{ url_for('logout') }}" method="post" style="margin-top:4px;">
-                    {{ logout_form.hidden_tag() }}
-                    <button type="submit" class="btn-pill btn-secondary">
-                        <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
-                    </button>
-                </form>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="btn-pill btn-secondary" style="padding:8px 14px;">Entrar</a>
-                {% endif %}
+            <div class="header-actions">
+                <button id="theme-toggle" type="button" class="theme-toggle">
+                    <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+                </button>
+                <div class="identity">
+                    {% if current_user.is_authenticated %}
+                    <span>{{ current_user.username }}</span>
+                    <span>{{ current_user.role }}</span>
+                    <form action="{{ url_for('logout') }}" method="post" class="logout-form">
+                        {{ logout_form.hidden_tag() }}
+                        <button type="submit" class="btn-pill btn-secondary">
+                            <span class="material-symbols-outlined icon-inline">logout</span>
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-pill btn-secondary login-link-btn">Entrar</a>
+                    {% endif %}
+                </div>
             </div>
         </header>
+        {% endif %}
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -274,16 +283,29 @@
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="border-t pb-6 pt-4 flex items-center justify-between" style="border-color: var(--border);">
-            <span class="text-[10px]" style="color: var(--muted);">MiniCRM</span>
-            <span class="text-[10px]" style="color: var(--muted);">v2.0</span>
+        <footer class="border-t pb-6 pt-4 flex items-center justify-between footer-shell">
+            <span class="text-[10px] footer-meta">MiniCRM</span>
+            <span class="text-[10px] footer-meta">v2.0</span>
         </footer>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         (function () {
             const icon = document.getElementById('theme-icon');
-            if (icon) icon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+            const toggle = document.getElementById('theme-toggle');
+            const updateIcon = () => {
+                if (!icon) return;
+                icon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+            };
+            updateIcon();
+            if (!toggle) return;
+            toggle.addEventListener('click', function () {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.theme = isDark ? 'dark' : 'light';
+                updateIcon();
+                document.dispatchEvent(new CustomEvent('themeChanged'));
+            });
         })();
     </script>
 </body>

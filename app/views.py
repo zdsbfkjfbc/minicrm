@@ -134,7 +134,13 @@ def login():
         login_user(user, remember=form.remember_me.data)
         app.logger.info(f"Login bem-sucedido: {user.username}")
         return redirect(url_for('index'))
-    return render_template('login.html', title='Entrar', form=form)
+    return render_template(
+        'login.html',
+        title='Entrar',
+        form=form,
+        hide_nav=True,
+        body_class='auth-shell min-h-screen antialiased'
+    )
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -148,7 +154,13 @@ def register():
         db.session.commit()
         flash('Cadastro realizado com sucesso! Agora você pode fazer login.')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Cadastrar', form=form)
+    return render_template(
+        'register.html',
+        title='Cadastrar',
+        form=form,
+        hide_nav=True,
+        body_class='auth-shell min-h-screen antialiased'
+    )
 
 @app.route('/dashboard')
 @login_required

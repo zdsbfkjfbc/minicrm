@@ -1,148 +1,141 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="flex flex-wrap items-end justify-between gap-4 mb-10">
-    <div>
-        <h1 class="text-xl font-bold" style="color: var(--fg);">Métricas</h1>
-        <p class="text-xs mt-1" style="color: var(--muted);">Visão geral de todos os atendimentos</p>
+<section class="metrics-page">
+    <header class="metrics-hero">
+        <div>
+            <p class="eyebrow">Painel Estratégico</p>
+            <h1>Métricas</h1>
+            <p>Visão geral consolidada de todos os atendimentos nos últimos 6 meses.</p>
+        </div>
+        <div class="metrics-actions">
+            <button id="export-metrics-btn" class="export-trigger" type="button">
+                <span class="material-symbols-outlined">file_download</span>
+                Exportar relatório
+                <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div id="export-metrics-menu" class="export-menu hidden">
+                <a href="{{ url_for('export_metrics', fmt='csv') }}">
+                    <span class="material-symbols-outlined">table_view</span>
+                    CSV
+                </a>
+                <div class="divider"></div>
+                <a href="{{ url_for('export_metrics', fmt='xlsx') }}">
+                    <span class="material-symbols-outlined">grid_on</span>
+                    Excel
+                </a>
+                <div class="divider"></div>
+                <a href="{{ url_for('export_metrics_pdf') }}">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    PDF
+                </a>
+                <div class="divider"></div>
+                <a href="{{ url_for('export_bi') }}">
+                    <span class="material-symbols-outlined">analytics</span>
+                    Power BI / Looker
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="metrics-grid-summary">
+        <article class="metric-card">
+            <span class="label">Total</span>
+            <span class="value">{{ metrics.total }}</span>
+            <span class="hint">Todos os atendimentos registrados</span>
+        </article>
+        <article class="metric-card metric-card--warning">
+            <span class="label">Abertos</span>
+            <span class="value">{{ metrics.abertos }}</span>
+            <span class="hint">Fila ativa para acompanhamento</span>
+        </article>
+        <article class="metric-card metric-card--warning">
+            <span class="label">Aguardando</span>
+            <span class="value">{{ metrics.aguardando }}</span>
+            <span class="hint">Tempo de resposta aguardado</span>
+        </article>
+        <article class="metric-card metric-card--positive">
+            <span class="label">Resolvidos</span>
+            <span class="value">{{ metrics.resolvidos }}</span>
+            <span class="hint">Entregas que cumpriram o SLA</span>
+        </article>
+        <article class="metric-card metric-card--danger">
+            <span class="label">Cancelados</span>
+            <span class="value">{{ metrics.cancelados }}</span>
+            <span class="hint">Atendimentos encerrados manualmente</span>
+        </article>
     </div>
-    <div class="relative flex gap-2" id="export-metrics-wrapper">
-        <button id="export-metrics-btn"
-            onclick="document.getElementById('export-metrics-menu').classList.toggle('hidden')"
-            class="flex items-center gap-1.5 h-8 px-3 border text-xs font-medium clip hover:opacity-60 transition-opacity"
-            style="border-color: var(--border); color: var(--muted);">
-            <span class="material-symbols-outlined text-[14px]">download</span>
-            Exportar Relatório
-            <span class="material-symbols-outlined text-[12px]">expand_more</span>
-        </button>
-        <div id="export-metrics-menu" class="hidden absolute right-0 top-full mt-1 border clip z-50 min-w-[190px]"
-            style="background: var(--bg); border-color: var(--border);">
-            <a href="{{ url_for('export_metrics', fmt='csv') }}"
-                class="flex items-center gap-2 px-4 py-2.5 text-xs hover:opacity-60 transition-opacity"
-                style="color: var(--fg);">
-                <span class="material-symbols-outlined text-[14px]">table_view</span>
-                Exportar CSV
-            </a>
-            <div class="h-px" style="background: var(--border);"></div>
-            <a href="{{ url_for('export_metrics', fmt='xlsx') }}"
-                class="flex items-center gap-2 px-4 py-2.5 text-xs hover:opacity-60 transition-opacity"
-                style="color: var(--fg);">
-                <span class="material-symbols-outlined text-[14px]">grid_on</span>
-                Exportar Excel
-            </a>
-            <div class="h-px" style="background: var(--border);"></div>
-            <a href="{{ url_for('export_metrics_pdf') }}"
-                class="flex items-center gap-2 px-4 py-2.5 text-xs hover:opacity-60 transition-opacity"
-                style="color: var(--fg);">
-                <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
-                Exportar PDF
-            </a>
-            <div class="h-px" style="background: var(--border);"></div>
-            <a href="{{ url_for('export_bi') }}"
-                class="flex items-center gap-2 px-4 py-2.5 text-xs hover:opacity-60 transition-opacity"
-                style="color: var(--fg);">
-                <span class="material-symbols-outlined text-[14px]">analytics</span>
-                <span>Power BI / Looker</span>
-            </a>
+
+    {% if metrics.overdue > 0 %}
+    <div class="metrics-alert">
+        <span class="material-symbols-outlined metrics-alert-danger-icon">warning</span>
+        <div>
+            <strong>{{ metrics.overdue }} prazo(s) expirado(s)</strong>
+            <p class="metrics-alert-note">Intervenção imediata recomendada.</p>
         </div>
     </div>
-</div>
+    {% else %}
+    <div class="metrics-alert metrics-alert-success">
+        <span class="material-symbols-outlined metrics-alert-success-icon">check_circle</span>
+        <div>
+            <strong>Todos os prazos dentro do limite.</strong>
+            <p class="metrics-alert-note">Continue monitorando os ciclos.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="charts-grid">
+        <section class="chart-card">
+            <h3>Distribuição</h3>
+            <p class="small">Status acumulado</p>
+            <div id="chart-donut"></div>
+        </section>
+        <section class="chart-card">
+            <h3>SLA</h3>
+            <p class="small">Cumprimento dos prazos</p>
+            <div id="chart-gauge"></div>
+        </section>
+        <section class="chart-card">
+            <h3>Abertos vs Resolvidos</h3>
+            <p class="small">Últimos 6 meses</p>
+            <div id="chart-line"></div>
+        </section>
+        <section class="chart-card">
+            <h3>Volume por mês</h3>
+            <p class="small">Contatos criados</p>
+            <div id="chart-bar"></div>
+        </section>
+        <section class="chart-card chart-card--wide">
+            <h3>Operadores</h3>
+            <p class="small">Distribuição de status por operador</p>
+            <div id="chart-stacked"></div>
+        </section>
+    </div>
+
+    <script type="application/json" id="d-donut">{{ donut_data | tojson }}</script>
+    <script type="application/json" id="d-labels">{{ monthly_labels | tojson }}</script>
+    <script type="application/json" id="d-values">{{ monthly_values | tojson }}</script>
+    <script type="application/json" id="d-abertos">{{ monthly_abertos | tojson }}</script>
+    <script type="application/json" id="d-resolvidos">{{ monthly_resolvidos | tojson }}</script>
+    <script type="application/json" id="d-op-names">{{ operator_names | tojson }}</script>
+    <script type="application/json" id="d-op-series">{{ operator_series | tojson }}</script>
+    <script type="application/json" id="d-op-colors">{{ op_colors | tojson }}</script>
+    <script type="application/json" id="d-sla">{{ sla_rate | tojson }}</script>
+</section>
+
 <script>
-    document.addEventListener('click', function (e) {
-        var wrapper = document.getElementById('export-metrics-wrapper');
-        var menu = document.getElementById('export-metrics-menu');
-        if (wrapper && menu && !wrapper.contains(e.target)) { menu.classList.add('hidden'); }
-    });
-</script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const menu = document.getElementById('export-metrics-menu');
+        document.getElementById('export-metrics-btn').addEventListener('click', function () {
+            menu.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function (event) {
+            const wrapper = document.querySelector('.metrics-actions');
+            if (wrapper && !wrapper.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
 
-<!-- Cards: 5 métricas -->
-<div class="grid grid-cols-2 xl:grid-cols-5 gap-3 mb-6">
-    <div class="border p-4 clip flex flex-col gap-3" style="border-color: var(--border);">
-        <p class="text-[10px] font-medium uppercase tracking-widest" style="color: var(--muted);">Total</p>
-        <p class="text-3xl font-bold" style="color: var(--fg);">{{ metrics.total }}</p>
-    </div>
-    <div class="border p-4 clip flex flex-col gap-3" style="border-color: var(--border);">
-        <p class="text-[10px] font-medium uppercase tracking-widest text-blue-500">Abertos</p>
-        <p class="text-3xl font-bold text-blue-500">{{ metrics.abertos }}</p>
-    </div>
-    <div class="border p-4 clip flex flex-col gap-3" style="border-color: var(--border);">
-        <p class="text-[10px] font-medium uppercase tracking-widest text-orange-500">Aguardando</p>
-        <p class="text-3xl font-bold text-orange-500">{{ metrics.aguardando }}</p>
-    </div>
-    <div class="border p-4 clip flex flex-col gap-3" style="border-color: var(--border);">
-        <p class="text-[10px] font-medium uppercase tracking-widest text-green-500">Resolvidos</p>
-        <p class="text-3xl font-bold text-green-500">{{ metrics.resolvidos }}</p>
-    </div>
-    <div class="border p-4 clip flex flex-col gap-3" style="border-color: var(--border);">
-        <p class="text-[10px] font-medium uppercase tracking-widest" style="color: var(--muted);">Cancelados</p>
-        <p class="text-3xl font-bold" style="color: var(--muted);">{{ metrics.cancelados }}</p>
-    </div>
-</div>
-
-<!-- Alerta SLA -->
-{% if metrics.overdue > 0 %}
-<div class="border border-red-500/40 p-4 clip flex items-center gap-3 mb-6">
-    <div class="size-1.5 bg-red-500 animate-pulse flex-shrink-0 rounded-full"></div>
-    <p class="text-sm font-bold text-red-500">{{ metrics.overdue }} atendimento(s) com prazo expirado</p>
-</div>
-{% else %}
-<div class="border p-4 clip flex items-center gap-3 mb-6" style="border-color: var(--border);">
-    <div class="size-1.5 bg-green-500 flex-shrink-0 rounded-full"></div>
-    <p class="text-sm font-medium text-green-500">Todos os prazos dentro do limite.</p>
-</div>
-{% endif %}
-
-<!-- Linha 1: Donut + Gauge + Linha dupla -->
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
-    <div class="border clip p-5" style="border-color: var(--border);">
-        <p class="text-xs font-medium mb-0.5" style="color: var(--fg);">Distribuição</p>
-        <p class="text-[10px] mb-4" style="color: var(--muted);">Por status</p>
-        <div id="chart-donut"></div>
-    </div>
-    <div class="border clip p-5" style="border-color: var(--border);">
-        <p class="text-xs font-medium mb-0.5" style="color: var(--fg);">SLA</p>
-        <p class="text-[10px] mb-4" style="color: var(--muted);">Taxa de cumprimento</p>
-        <div id="chart-gauge"></div>
-    </div>
-    <div class="border clip p-5 lg:col-span-2" style="border-color: var(--border);">
-        <p class="text-xs font-medium mb-0.5" style="color: var(--fg);">Abertos vs Resolvidos</p>
-        <p class="text-[10px] mb-4" style="color: var(--muted);">Últimos 6 meses</p>
-        <div id="chart-line"></div>
-    </div>
-</div>
-
-<!-- Linha 2: Barras mensais + Operadores -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-    <div class="border clip p-5" style="border-color: var(--border);">
-        <p class="text-xs font-medium mb-0.5" style="color: var(--fg);">Volume por Mês</p>
-        <p class="text-[10px] mb-4" style="color: var(--muted);">Contatos criados nos últimos 6 meses</p>
-        <div id="chart-bar"></div>
-    </div>
-    <div class="border clip p-5" style="border-color: var(--border);">
-        <p class="text-xs font-medium mb-0.5" style="color: var(--fg);">Por Operador</p>
-        <p class="text-[10px] mb-4" style="color: var(--muted);">Distribuição de status por operador</p>
-        <div id="chart-stacked"></div>
-    </div>
-</div>
-
-<!--
-  Dados Jinja2 isolados em blocos script[type="application/json"].
-  O linter JS ignora completamente esses blocos (type != text/javascript).
-  O código JS abaixo os lê via JSON.parse() sem nenhuma sintaxe Jinja2 misturada.
--->
-<script type="application/json" id="d-donut">{{ donut_data | tojson }}</script>
-<script type="application/json" id="d-labels">{{ monthly_labels | tojson }}</script>
-<script type="application/json" id="d-values">{{ monthly_values | tojson }}</script>
-<script type="application/json" id="d-abertos">{{ monthly_abertos | tojson }}</script>
-<script type="application/json" id="d-resolvidos">{{ monthly_resolvidos | tojson }}</script>
-<script type="application/json" id="d-op-names">{{ operator_names | tojson }}</script>
-<script type="application/json" id="d-op-series">{{ operator_series | tojson }}</script>
-<script type="application/json" id="d-op-colors">{{ op_colors | tojson }}</script>
-<script type="application/json" id="d-sla">{{ sla_rate | tojson }}</script>
-
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<script>
-    (function () {
         function jd(id) { return JSON.parse(document.getElementById(id).textContent); }
 
         var donutData = jd('d-donut');
@@ -155,124 +148,140 @@
         var opColors = jd('d-op-colors');
         var slaRate = jd('d-sla');
 
-        var isDark = document.documentElement.classList.contains('dark');
-        var fg = isDark ? '#f0f0f0' : '#111111';
-        var muted = isDark ? '#666666' : '#888888';
-        var bg = isDark ? '#0a0a0a' : '#fafafa';
-        var border = isDark ? '#2a2a2a' : '#e0e0e0';
+        function renderAllCharts() {
+            var isDark = document.documentElement.classList.contains('dark');
+            var fg = isDark ? '#f0f0f0' : '#111111';
+            var muted = isDark ? '#666666' : '#888888';
+            var bg = isDark ? '#0a0a0a' : '#fafafa';
+            var border = isDark ? '#2a2a2a' : '#e0e0e0';
 
-        var mono = "'JetBrains Mono', monospace";
-        var axisStyle = { fontFamily: mono, fontSize: '10px', colors: muted };
-        var tip = { theme: isDark ? 'dark' : 'light', style: { fontFamily: mono, fontSize: '11px' } };
-        var tMode = { mode: isDark ? 'dark' : 'light' };
-        var base = {
-            fontFamily: mono,
-            background: 'transparent',
-            toolbar: { show: false },
-            animations: { enabled: true, speed: 500, easing: 'easeinout' }
-        };
+            var mono = "'JetBrains Mono', monospace";
+            var axisStyle = { fontFamily: mono, fontSize: '10px', colors: muted };
+            var tip = { theme: isDark ? 'dark' : 'light', style: { fontFamily: mono, fontSize: '11px' } };
+            var tMode = { mode: isDark ? 'dark' : 'light' };
+            var base = {
+                fontFamily: mono,
+                background: 'transparent',
+                toolbar: { show: false },
+                animations: { enabled: true, speed: 500, easing: 'easeinout' }
+            };
 
-        // 1. Donut
-        new ApexCharts(document.getElementById('chart-donut'), {
-            chart: Object.assign({}, base, { type: 'donut', height: 220 }),
-            series: donutData,
-            labels: ['Aberto', 'Aguardando', 'Resolvido', 'Cancelado'],
-            colors: ['#3b82f6', '#f97316', '#22c55e', '#9ca3af'],
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontFamily: mono, fontSize: '10px', labels: { colors: [muted, muted, muted, muted] } },
-            stroke: { colors: [bg], width: 2 },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '65%', labels: {
-                            show: true,
-                            total: {
-                                show: true, label: 'Total', fontSize: '10px', fontWeight: '700', color: muted,
-                                formatter: function (w) { return w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0); }
-                            },
-                            value: { fontSize: '20px', fontWeight: '700', color: fg }
+            var slaColor = slaRate >= 90 ? '#22c55e' : slaRate >= 70 ? '#f97316' : '#ef4444';
+
+            if (window.dashboardCharts) {
+                window.dashboardCharts.forEach(function(c) { c.destroy(); });
+            }
+            window.dashboardCharts = [];
+
+            var c1 = new ApexCharts(document.getElementById('chart-donut'), {
+                chart: Object.assign({}, base, { type: 'donut', height: 280 }),
+                series: donutData,
+                labels: ['Aberto', 'Aguardando', 'Resolvido', 'Cancelado'],
+                colors: ['#3b82f6', '#f97316', '#22c55e', '#9ca3af'],
+                dataLabels: { enabled: false },
+                legend: { position: 'bottom', fontFamily: mono, fontSize: '10px', labels: { colors: [muted, muted, muted, muted] } },
+                stroke: { colors: [bg], width: 2 },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '60%', labels: {
+                                show: true,
+                                total: {
+                                    show: true, label: 'Total', fontSize: '10px', fontWeight: '700', color: muted,
+                                    formatter: function (w) { return w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0); }
+                                },
+                                value: { fontSize: '20px', fontWeight: '700', color: fg }
+                            }
                         }
                     }
-                }
-            },
-            tooltip: tip, theme: tMode
-        }).render();
+                },
+                tooltip: tip, theme: tMode
+            });
+            c1.render();
+            window.dashboardCharts.push(c1);
 
-        // 2. Gauge SLA
-        var slaColor = slaRate >= 90 ? '#22c55e' : slaRate >= 70 ? '#f97316' : '#ef4444';
-        new ApexCharts(document.getElementById('chart-gauge'), {
-            chart: Object.assign({}, base, { type: 'radialBar', height: 220 }),
-            series: [slaRate],
-            plotOptions: {
-                radialBar: {
-                    startAngle: -130, endAngle: 130,
-                    hollow: { size: '55%' },
-                    track: { background: border, strokeWidth: '100%' },
-                    dataLabels: {
-                        name: { offsetY: -8, fontSize: '10px', fontFamily: mono, color: muted, show: true },
-                        value: {
-                            offsetY: 4, fontSize: '22px', fontFamily: mono, fontWeight: '700', color: fg,
-                            formatter: function (v) { return v + '%'; }
+            var c2 = new ApexCharts(document.getElementById('chart-gauge'), {
+                chart: Object.assign({}, base, { type: 'radialBar', height: 280 }),
+                series: [slaRate],
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -130, endAngle: 130,
+                        hollow: { size: '55%' },
+                        track: { background: border, strokeWidth: '100%' },
+                        dataLabels: {
+                            name: { offsetY: -8, fontSize: '10px', fontFamily: mono, color: muted, show: true },
+                            value: {
+                                offsetY: 4, fontSize: '22px', fontFamily: mono, fontWeight: '700', color: fg,
+                                formatter: function (v) { return v + '%'; }
+                            }
                         }
                     }
-                }
-            },
-            labels: ['Cumprimento'],
-            colors: [slaColor],
-            stroke: { lineCap: 'round' },
-            tooltip: tip, theme: tMode
-        }).render();
+                },
+                labels: ['Cumprimento'],
+                colors: [slaColor],
+                stroke: { lineCap: 'round' },
+                tooltip: tip, theme: tMode
+            });
+            c2.render();
+            window.dashboardCharts.push(c2);
 
-        // 3. Linha dupla
-        new ApexCharts(document.getElementById('chart-line'), {
-            chart: Object.assign({}, base, { type: 'line', height: 220 }),
-            series: [
-                { name: 'Abertos', data: monthlyAbertos },
-                { name: 'Resolvidos', data: monthlyResol }
-            ],
-            colors: ['#3b82f6', '#22c55e'],
-            xaxis: { categories: monthlyLabels, labels: { style: axisStyle }, axisBorder: { color: border }, axisTicks: { color: border } },
-            yaxis: { labels: { style: axisStyle } },
-            grid: { borderColor: border, strokeDashArray: 3 },
-            stroke: { width: 2, curve: 'smooth' },
-            markers: { size: 4 },
-            dataLabels: { enabled: false },
-            legend: { fontFamily: mono, fontSize: '10px', labels: { colors: [muted, muted] } },
-            tooltip: tip, theme: tMode
-        }).render();
+            var c3 = new ApexCharts(document.getElementById('chart-line'), {
+                chart: Object.assign({}, base, { type: 'line', height: 320 }),
+                series: [
+                    { name: 'Abertos', data: monthlyAbertos },
+                    { name: 'Resolvidos', data: monthlyResol }
+                ],
+                colors: ['#3b82f6', '#22c55e'],
+                xaxis: { categories: monthlyLabels, labels: { style: axisStyle }, axisBorder: { color: border }, axisTicks: { color: border } },
+                yaxis: { labels: { style: axisStyle } },
+                grid: { borderColor: border, strokeDashArray: 3 },
+                stroke: { width: 2, curve: 'smooth' },
+                markers: { size: 5 },
+                dataLabels: { enabled: false },
+                legend: { fontFamily: mono, fontSize: '10px', labels: { colors: [muted, muted] } },
+                tooltip: tip, theme: tMode
+            });
+            c3.render();
+            window.dashboardCharts.push(c3);
 
-        // 4. Barras mensais
-        new ApexCharts(document.getElementById('chart-bar'), {
-            chart: Object.assign({}, base, { type: 'bar', height: 220 }),
-            series: [{ name: 'Contatos', data: monthlyValues }],
-            colors: [fg],
-            xaxis: { categories: monthlyLabels, labels: { style: axisStyle }, axisBorder: { color: border }, axisTicks: { color: border } },
-            yaxis: { labels: { style: axisStyle } },
-            grid: { borderColor: border, strokeDashArray: 3 },
-            plotOptions: { bar: { borderRadius: 0, columnWidth: '40%' } },
-            dataLabels: { enabled: false },
-            tooltip: tip, theme: tMode
-        }).render();
+            var c4 = new ApexCharts(document.getElementById('chart-bar'), {
+                chart: Object.assign({}, base, { type: 'bar', height: 320 }),
+                series: [{ name: 'Contatos', data: monthlyValues }],
+                colors: [fg],
+                xaxis: { categories: monthlyLabels, labels: { style: axisStyle }, axisBorder: { color: border }, axisTicks: { color: border } },
+                yaxis: { labels: { style: axisStyle } },
+                grid: { borderColor: border, strokeDashArray: 3 },
+                plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+                dataLabels: { enabled: false },
+                tooltip: tip, theme: tMode
+            });
+            c4.render();
+            window.dashboardCharts.push(c4);
 
-        // 5. Barras empilhadas por operador
-        new ApexCharts(document.getElementById('chart-stacked'), {
-            chart: Object.assign({}, base, { type: 'bar', height: 220, stacked: true }),
-            series: opSeries,
-            colors: opColors,
-            xaxis: {
-                categories: opNames.length ? opNames : ['Sem operadores'],
-                labels: { style: axisStyle },
-                axisBorder: { color: border },
-                axisTicks: { color: border }
-            },
-            yaxis: { labels: { style: axisStyle } },
-            grid: { borderColor: border, strokeDashArray: 3 },
-            plotOptions: { bar: { borderRadius: 0, columnWidth: '40%', horizontal: false } },
-            dataLabels: { enabled: false },
-            legend: { fontFamily: mono, fontSize: '10px', labels: { colors: [muted, muted, muted, muted] } },
-            tooltip: tip, theme: tMode
-        }).render();
-    })();
+            var c5 = new ApexCharts(document.getElementById('chart-stacked'), {
+                chart: Object.assign({}, base, { type: 'bar', height: 360, stacked: true }),
+                series: opSeries,
+                colors: opColors,
+                xaxis: {
+                    categories: opNames.length ? opNames : ['Sem operadores'],
+                    labels: { style: axisStyle },
+                    axisBorder: { color: border },
+                    axisTicks: { color: border }
+                },
+                yaxis: { labels: { style: axisStyle } },
+                grid: { borderColor: border, strokeDashArray: 3 },
+                plotOptions: { bar: { borderRadius: 4, columnWidth: '35%' } },
+                dataLabels: { enabled: false },
+                legend: { fontFamily: mono, fontSize: '10px', labels: { colors: [muted, muted, muted, muted] } },
+                tooltip: tip, theme: tMode
+            });
+            c5.render();
+            window.dashboardCharts.push(c5);
+        }
+
+        renderAllCharts();
+        document.addEventListener('themeChanged', renderAllCharts);
+    });
 </script>
 
 {% endblock %}

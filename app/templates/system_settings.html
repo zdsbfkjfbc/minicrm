@@ -1,49 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-lg">
-    <div class="mb-8">
-        <h1 class="text-xl font-bold tracking-tight" style="color: var(--fg);">Configurações</h1>
-        <p class="text-xs mt-1" style="color: var(--muted);">Parâmetros globais do sistema. Apenas Gestores podem
-            alterar.</p>
-    </div>
 
-    <div class="border p-6" style="border-color: var(--border);">
-        <form method="POST" action="{{ url_for('system_settings') }}">
-            {{ form.hidden_tag() }}
+<section class="page-shell">
+    <section class="section-card">
+        <header class="section-heading">
+        <p class="eyebrow">Gestão</p>
+        <h1>Configurações</h1>
+        <p>Parâmetros globais do sistema. Apenas gestores possuem permissão para alterar.</p>
+    </header>
+    </section>
 
-            <div class="mb-6">
-                <label class="block text-xs font-medium mb-2" style="color: var(--fg);">
-                    <span class="material-symbols-outlined text-[14px] mr-1"
-                        style="vertical-align: middle;">notifications_active</span>
-                    Dias para Alerta de Inatividade
-                </label>
-                <p class="text-[11px] mb-3" style="color: var(--muted);">
-                    Clientes sem status "Resolvido" ou "Cancelado" criados há mais deste número de dias serão destacados
-                    como inativos no painel.
-                </p>
-                <div class="flex items-center gap-3">
-                    {{ form.days_inactive_alert(class="w-24 px-3 py-2 border text-xs bg-transparent focus:outline-none", style="border-color: var(--border); color: var(--fg);", min="1", max="365") }}
-                    <span class="text-xs" style="color: var(--muted);">dias</span>
+    <div class="panel-grid">
+        <article class="panel-card">
+            <div>
+                <p class="panel-title"><span class="material-symbols-outlined icon-inline">tune</span> Ajuste de alertas</p>
+                <p class="panel-subtitle">Defina o ciclo em dias para destacar contatos inativos.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('system_settings') }}" class="form-panel">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="material-symbols-outlined icon-inline">notifications_active</span>
+                        Dias para alerta de inatividade
+                    </label>
+                    <div class="form-grid">
+                        {{ form.days_inactive_alert(class="input-control", min="1", max="365") }}
+                        <span class="helper-stack settings-inline-meta">
+                            <strong>{{ days_inactive }}</strong> dias atuais
+                        </span>
+                    </div>
+                    <p class="helper-stack">
+                        Contatos sem status "Resolvido" ou "Cancelado" criados há mais do que esse período ficam em evidência.
+                    </p>
                 </div>
-            </div>
 
-            <div class="border-t pt-5" style="border-color: var(--border);">
-                <button type="submit"
-                    class="px-4 py-2 border text-xs font-medium clip hover:opacity-70 transition-opacity"
-                    style="border-color: var(--fg); color: var(--fg);">
-                    <span class="material-symbols-outlined text-[14px] mr-1" style="vertical-align: middle;">save</span>
-                    Salvar Configurações
-                </button>
-            </div>
-        </form>
-    </div>
+                <div class="panel-footer settings-panel-footer">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span class="material-symbols-outlined icon-inline">save</span>
+                        Salvar configurações
+                    </button>
+                </div>
+            </form>
+        </article>
 
-    <div class="mt-6 border p-4" style="border-color: var(--border); background: var(--surface);">
-        <p class="text-[11px] font-medium mb-1" style="color: var(--fg);">Configuração atual</p>
-        <p class="text-[11px]" style="color: var(--muted);">
-            Alerta de inatividade ativo para contatos sem resposta há mais de
-            <strong style="color: var(--fg);">{{ days_inactive }} dias</strong>.
-        </p>
+        <article class="panel-card">
+            <p class="panel-title">Estado atual</p>
+            <p class="panel-subtitle">As configurações atuais guiam a sinalização visual.</p>
+            <p class="helper-stack">
+                <strong class="text-primary">{{ days_inactive }} dias</strong> para alerta de inatividade.
+            </p>
+        </article>
     </div>
-</div>
+</section>
+
 {% endblock %}

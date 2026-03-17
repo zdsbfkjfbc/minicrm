@@ -3,30 +3,30 @@
 {% block content %}
 
 <div class="glass-panel">
-    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; align-items:center; gap:12px;">
+    <div class="section-row-between">
         <div>
-            <p class="hero-title" style="margin:0;">Alertas</p>
-            <p style="margin:6px 0 0; color:var(--muted);">Monitoramento dos webhooks recentes</p>
+            <p class="hero-title">Alertas</p>
+            <p class="subtitle-inline">Monitoramento dos webhooks recentes</p>
         </div>
         <div class="pill-group">
             <a href="{{ url_for('audit_logs') }}" class="btn-pill btn-secondary">Auditoria</a>
         </div>
     </div>
 
-    <div style="margin-top:20px; display:grid; gap:12px;">
+    <div class="alerts-list">
         {% if alerts %}
         {% for alert in alerts %}
-        <div style="padding:16px; border-radius:12px; background:var(--panel-bg); border:1px solid var(--border); box-shadow:0 15px 30px rgba(15,23,42,0.06);">
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted);">
+        <div class="alert-card">
+            <div class="alert-meta">
                 <span>{{ alert.timestamp.strftime('%d/%m/%Y %H:%M') }}</span>
                 <span>{{ alert.user_id or 'system' }}</span>
             </div>
-            <p style="margin:8px 0; font-weight:600;">{{ alert.action }}</p>
-            <p style="margin:0; font-size:0.85rem; color:var(--text);">{{ alert.details }}</p>
+            <p class="alert-title">{{ alert.action }}</p>
+            <p class="alert-details">{{ alert.details }}</p>
         </div>
         {% endfor %}
         {% else %}
-        <p style="text-align:center; padding:32px 0; color:var(--muted);">Nenhum alerta registrado.</p>
+        <p class="alert-empty">Nenhum alerta registrado.</p>
         {% endif %}
     </div>
 </div>

@@ -3,11 +3,11 @@
 {% block content %}
 
 <div class="glass-panel">
-    <div style="display:flex; flex-direction:column; gap:16px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+    <div class="section-stack">
+        <div class="section-row-between">
             <div>
-                <p class="hero-title" style="margin:0;">Painel</p>
-                <p style="margin:6px 0 0; color:var(--muted);">{{ current_user.username }} · {{ current_user.role }}</p>
+                <p class="hero-title">Painel</p>
+                <p class="subtitle-inline">{{ current_user.username }} · {{ current_user.role }}</p>
             </div>
             <div class="pill-group">
                 <a href="{{ url_for('import_csv') }}" class="btn-pill btn-accent">Importar</a>
@@ -32,17 +32,17 @@
 </div>
 
 <div class="glass-panel">
-    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
-        <form method="get" action="{{ url_for('index') }}" style="display:flex; flex-wrap:wrap; gap:10px;">
-            <input name="search" value="{{ search_query }}" placeholder="Buscar cliente" style="border:1px solid var(--border); border-radius:10px; padding:10px 14px; width:220px; background:#f9fafb;" />
-            <select name="status" style="border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:#f9fafb;">
+    <div class="filter-row">
+        <form method="get" action="{{ url_for('index') }}" class="index-filter-form">
+            <input name="search" value="{{ search_query }}" placeholder="Buscar cliente" class="filter-control search" />
+            <select name="status" class="filter-control">
                 <option value="Todos" {% if status_filter=='Todos' %}selected{% endif %}>Todos</option>
                 <option value="Aberto" {% if status_filter=='Aberto' %}selected{% endif %}>Aberto</option>
                 <option value="Aguardando Cliente" {% if status_filter=='Aguardando Cliente' %}selected{% endif %}>Aguardando</option>
                 <option value="Resolvido" {% if status_filter=='Resolvido' %}selected{% endif %}>Resolvido</option>
                 <option value="Cancelado" {% if status_filter=='Cancelado' %}selected{% endif %}>Cancelado</option>
             </select>
-            <select name="sort" style="border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:#f9fafb;">
+            <select name="sort" class="filter-control">
                 <option value="deadline_asc" {% if sort_by=='deadline_asc' %}selected{% endif %}>Prazo ↑</option>
                 <option value="deadline_desc" {% if sort_by=='deadline_desc' %}selected{% endif %}>Prazo ↓</option>
                 <option value="created_desc" {% if sort_by=='created_desc' %}selected{% endif %}>Recentes</option>
@@ -72,25 +72,25 @@
                 <tr>
                     <td>
                         <strong>{{ contact.customer_name }}</strong>
-                        <p style="margin:4px 0 0; font-size:0.75rem; color:var(--muted);">#{{ contact.id }}</p>
+                        <p class="contact-id">#{{ contact.id }}</p>
                     </td>
                     {% if current_user.role == 'Gestor' %}
                     <td>{{ contact.owner.username if contact.owner else '—' }}</td>
                     {% endif %}
-                    <td><span class="highlight-pill">{{ contact.status }}</span></td>
+                    <td><span class="badge badge-{{ contact.status | lower | replace(' ', '-') }}">{{ contact.status }}</span></td>
                     <td>{{ contact.deadline.strftime('%d/%m/%Y') if contact.deadline else '—' }}</td>
-                    <td style="max-width:220px;">{{ contact.observations or 'Nenhuma observação' }}</td>
-                    <td><a href="{{ url_for('view_contact', contact_id=contact.id) }}" class="btn-pill btn-secondary" style="padding:5px 12px;">Ver</a></td>
+                    <td class="observations-cell">{{ contact.observations or 'Nenhuma observação' }}</td>
+                    <td><a href="{{ url_for('view_contact', contact_id=contact.id) }}" class="btn-pill btn-secondary btn-compact">Ver</a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
-                <tr><td colspan="6" style="text-align:center; padding:24px; color:var(--muted);">Nenhum contato encontrado.</td></tr>
+                <tr><td colspan="6" class="table-empty">Nenhum contato encontrado.</td></tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
 
-    <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:0.75rem; color:var(--muted);">
+    <div class="pagination-summary">
         <span>Pág {{ contacts.page }} de {{ contacts.pages }}</span>
         <span>{{ contacts.total }} registros</span>
     </div>

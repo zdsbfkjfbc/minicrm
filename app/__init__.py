@@ -59,6 +59,10 @@ def create_app(config_class=Config):
         def inject_logout_form():
             return {'logout_form': LogoutForm()}
 
+        @app.context_processor
+        def inject_active_endpoint():
+            return {'current_endpoint': request.endpoint}
+
         @app.before_request
         def attach_trace_id():
             trace_id = request.headers.get('X-Request-ID') or str(uuid.uuid4())
