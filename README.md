@@ -72,6 +72,11 @@ Ambos os endpoints dependem da sessão Flask-Login e servem como base para uma i
 - Há um health check leve em `/healthz` que retorna `{"status":"ok","trace_id":...}`.
 - O logger do Flask foi ajustado para usar formato JSON estruturado com `trace_id` (`X-Request-ID` é propagado nas respostas), facilitando conexão com observabilidade (Stackdriver, Honeycomb, Grafana Loki etc.).
 
+## Integrações e runbook
+- `POST /webhooks/notify` aceita payload JSON com header `X-Webhook-Token` (veja `.env.example`) e registra um `AuditLog(action='webhook')` para cada chamada recebida.
+- `GET /alerts` mostra aos Gestores os últimos 50 eventos de webhook e serve como base para dashboards SLA ou integrações externas.
+- Runbook curto: se o job de importação ficar travado ou muitos alertas chegarem com erro, verifique `logs/minicrm.log`, rode `docker-compose restart web` e dispare um webhook de teste para confirmar o canal.
+
 ## Infraestrutura e pipeline
 
 - **Docker Compose:** suba `db`, `redis` e app com `docker-compose up --build`. O arquivo `docker-compose.yml` usa Postgres 16 e Redis 8, linkando `DATABASE_URL` e `REDIS_URL` via variáveis de ambiente documentadas em `.env.example`.

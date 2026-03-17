@@ -1,5 +1,7 @@
+import json
+
 from flask import (render_template, flash, redirect, url_for, request, Response,
-                   abort)
+                   abort, jsonify)
 from flask_login import current_user, login_user, logout_user, login_required
 from app import db
 from app.models import User, Contact, AuditLog, SystemSettings
@@ -725,6 +727,28 @@ def audit_logs():
     page = request.args.get('page', 1, type=int)
     logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).paginate(page=page, per_page=30, error_out=False)
     return render_template('audit_logs.html', title='Log de Auditoria', logs=logs)
+
+
+@app.route('/webhooks/notify', methods=['POST'])
+def webhook_notify():
+    token = request.headers.get('X-Webhook-Token', '')
+    if token != app.config['WEBHOOK_TOKEN']:
+        abort(403)
+    payload = request.get_json(silent=True) or {}
+    details = json.dumps(payload, default=str)
+    record_audit('webhook', 'Webhook', None, details=details)
+    app.logger.info(f"Webhook recebido (%s)", payload)
+    return jsonify({'status': 'accepted'}), 202
+
+
+@app.route('/alerts')
+@login_required
+def alert_history():
+    if current_user.role != 'Gestor':
+        flash('Acesso negado. Apenas Gestores podem ver alertas de integração.', 'error')
+        return redirect(url_for('index'))
+    alerts = AuditLog.query.filter_by(action='webhook').order_by(AuditLog.timestamp.desc()).limit(50).all()
+    return render_template('alerts.html', alerts=alerts)
 
 
 @app.route('/system_settings', methods=['GET', 'POST'])

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold" style="color: var(--fg);">Alertas de Webhook</h2>
+        <p class="text-xs" style="color: var(--muted);">Registros dos últimos 50 eventos</p>
+    </div>
+
+    <div class="border rounded">
+        <div class="grid grid-cols-4 px-4 py-2 text-[10px] uppercase tracking-widest" style="color: var(--muted);">
+            <span>Data</span>
+            <span>Usuário</span>
+            <span>Alvo</span>
+            <span>Detalhes</span>
+        </div>
+        {% for alert in alerts %}
+        <div class="grid grid-cols-4 px-4 py-3 border-t" style="color: var(--fg);">
+            <span class="text-[12px]">{{ alert.timestamp.strftime('%d/%m/%Y %H:%M') }}</span>
+            <span class="text-[12px]">{{ alert.user_id or 'system' }}</span>
+            <span class="text-[12px]">{{ alert.target_type }}</span>
+            <span class="text-[12px] truncate" title="{{ alert.details }}">{{ alert.details }}</span>
+        </div>
+        {% else %}
+        <div class="px-4 py-6 text-center text-xs" style="color: var(--muted);">
+            Nenhum alerta recebido ainda.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
