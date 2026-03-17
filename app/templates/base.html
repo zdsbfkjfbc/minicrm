@@ -14,19 +14,18 @@
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --base-bg: #f5f5fb;
-            --panel-bg: #fff;
-            --line: #e0e3ed;
-            --text: #0f1b35;
-            --muted: #677285;
-            --accent: #ff7849;
-            --accent-strong: #ff4d2f;
-            --shadow-soft: 0 25px 60px rgba(19, 24, 44, 0.08);
+            --page-bg: #f4f5f7;
+            --panel-bg: #ffffff;
+            --border: #e3e6ee;
+            --text: #111827;
+            --muted: #6b7280;
+            --accent: #ff6b2f;
+            --card-shadow: 0 25px 40px rgba(15, 23, 42, 0.08);
         }
 
         *, *::before, *::after {
@@ -35,45 +34,35 @@
 
         body {
             margin: 0;
-            min-height: 100vh;
-            background: var(--base-bg);
-            color: var(--text);
             font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
         }
 
-        .app-shell {
+        .main-wrapper {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 32px 24px 60px;
+            padding: 32px 24px;
         }
 
         header {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
             align-items: center;
-            padding: 20px 28px;
-            border-radius: 18px;
-            background: var(--panel-bg);
-            border: 1px solid var(--line);
-            box-shadow: var(--shadow-soft);
+            justify-content: space-between;
             gap: 12px;
-            position: relative;
-        }
-
-        header::after {
-            content: "";
-            position: absolute;
-            inset: 12px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(255, 120, 73, 0.15), rgba(255, 255, 255, 0));
-            pointer-events: none;
+            padding: 20px 28px;
+            border-radius: 14px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
         }
 
         .brand-mark {
-            font-family: 'Unbounded', serif;
-            font-size: clamp(1.5rem, 3vw, 2.1rem);
-            letter-spacing: 0.28em;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            letter-spacing: 0.3em;
             text-transform: uppercase;
         }
 
@@ -84,151 +73,184 @@
         }
 
         nav a {
-            text-transform: uppercase;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             letter-spacing: 0.2em;
+            text-transform: uppercase;
             color: var(--muted);
-            border-bottom: 2px solid transparent;
-            padding-bottom: 4px;
-            transition: border 0.2s ease;
+            text-decoration: none;
         }
 
-        nav a:hover {
-            border-color: var(--accent);
+        nav a.active {
             color: var(--text);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 4px;
         }
 
         .identity {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 2px;
+            gap: 4px;
             font-size: 0.75rem;
             letter-spacing: 0.2em;
         }
 
-        .identity span {
-            opacity: 0.8;
-        }
-
         .btn-pill {
-            border: 0;
-            padding: 10px 18px;
             border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 0.65rem;
             letter-spacing: 0.2em;
-            font-size: 0.7rem;
             text-transform: uppercase;
-            font-family: 'Unbounded', sans-serif;
+            font-family: 'Inter', sans-serif;
+            border: none;
             cursor: pointer;
-            transition: transform 0.25s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        .btn-accent {
+            background: var(--accent);
             color: #fff;
-            box-shadow: 0 20px 35px rgba(255, 120, 73, 0.35);
+            box-shadow: 0 12px 30px rgba(255, 107, 47, 0.4);
         }
 
         .btn-secondary {
             background: transparent;
-            border: 1px solid var(--line);
+            border: 1px solid var(--border);
             color: var(--text);
         }
 
-        .btn-pill:hover {
-            transform: translateY(-2px);
+        .pill-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .flash-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin: 28px 0;
-        }
-
-        .flash-card {
-            padding: 18px;
+        .glass-panel {
             border-radius: 16px;
             background: var(--panel-bg);
-            border: 1px solid var(--line);
-            box-shadow: 0 20px 45px rgba(19, 24, 44, 0.08);
+            border: 1px solid var(--border);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-top: 24px;
+        }
+
+        .metric-card {
+            border-radius: 12px;
+            padding: 18px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .metric-card h3 {
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .metric-card .value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .table-wrapper {
+            margin-top: 16px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--panel-bg);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 14px 18px;
+        }
+
+        th {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr + tr td {
+            border-top: 1px solid var(--border);
+        }
+
+        .highlight-pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 107, 47, 0.4);
+            color: var(--accent);
+            font-size: 0.65rem;
         }
 
         footer {
             text-align: center;
             margin-top: 40px;
             font-size: 0.75rem;
-            letter-spacing: 0.3em;
             color: var(--muted);
+            letter-spacing: 0.2em;
+        }
+
+        @media (max-width: 800px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .identity {
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 
 <body class="min-h-screen antialiased">
-    <div class="max-w-[1200px] mx-auto px-5 lg:px-10">
+    <div class="main-wrapper">
 
         <!-- Navbar -->
-        <header class="flex items-center justify-between h-14 border-b" style="border-color: var(--border);">
-            <a href="{{ url_for('index') }}"
-                class="flex items-center gap-2.5 hover:opacity-60 transition-opacity duration-200">
-                <div class="size-4 border-2" style="border-color: var(--fg);"></div>
-                <span class="text-sm font-bold tracking-tight" style="color: var(--fg);">MiniCRM</span>
-            </a>
-
-            <div class="flex items-center gap-5">
+        <header>
+            <div class="brand-mark">MiniCRM</div>
+            <nav>
+                <a href="{{ url_for('index') }}" class="active">Painel</a>
+                {% if current_user.is_authenticated and current_user.role == 'Gestor' %}
+                <a href="{{ url_for('dashboard') }}">Métricas</a>
+                <a href="{{ url_for('audit_logs') }}">Auditoria</a>
+                <a href="{{ url_for('system_settings') }}">Configurações</a>
+                {% endif %}
+                <a href="{{ url_for('import_csv') }}">Importar</a>
+            </nav>
+            <div class="identity">
                 {% if current_user.is_authenticated %}
-                <nav class="hidden md:flex items-center gap-5">
-                    <a href="{{ url_for('index') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--fg);">Painel</a>
-                    {% if current_user.role == 'Gestor' %}
-                    <a href="{{ url_for('dashboard') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Métricas</a>
-                    <a href="{{ url_for('audit_logs') }}"
-                        class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Auditoria</a>
-                    <a href="{{ url_for('system_settings') }}"
-                        class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Configurações</a>
-                    {% endif %}
-                    <a href="{{ url_for('import_csv') }}"
-                        class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Importar</a>
-                </nav>
-
-                <div class="h-5 w-px" style="background: var(--border);"></div>
-
-                <div class="hidden sm:flex flex-col items-end">
-                    <span class="text-xs font-bold" style="color: var(--fg);">{{ current_user.username }}</span>
-                    <span class="text-[10px]" style="color: var(--muted);">{{ current_user.role }}</span>
-                </div>
-
-                <form action="{{ url_for('logout') }}" method="post"
-                    class="flex items-center gap-1.5 text-xs font-medium hover:opacity-60 transition-opacity"
-                    style="color: var(--muted);">
+                <span>{{ current_user.username }}</span>
+                <span>{{ current_user.role }}</span>
+                <form action="{{ url_for('logout') }}" method="post" style="margin-top:4px;">
                     {{ logout_form.hidden_tag() }}
-                    <button type="submit" class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">logout</span>
-                        <span class="hidden sm:inline">Sair</span>
+                    <button type="submit" class="btn-pill btn-secondary">
+                        <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
                     </button>
                 </form>
                 {% else %}
-                <a href="{{ url_for('login') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
-                    style="color: var(--muted);">Entrar</a>
-                <a href="{{ url_for('register') }}"
-                    class="px-3 py-1.5 border text-xs font-medium clip hover:opacity-70 transition-opacity"
-                    style="border-color: var(--fg); color: var(--fg);">Cadastrar</a>
+                <a href="{{ url_for('login') }}" class="btn-pill btn-secondary" style="padding:8px 14px;">Entrar</a>
                 {% endif %}
-
-                <!-- Toggle tema -->
-                <button onclick="
-                document.documentElement.classList.toggle('dark');
-                const isDark = document.documentElement.classList.contains('dark');
-                localStorage.theme = isDark ? 'dark' : 'light';
-                document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
-            " class="flex items-center justify-center hover:opacity-50 transition-opacity" style="color: var(--muted);"
-                    title="Alternar tema">
-                    <span id="theme-icon" class="material-symbols-outlined text-[18px]">dark_mode</span>
-                </button>
             </div>
         </header>
 
