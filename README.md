@@ -71,3 +71,10 @@ Ambos os endpoints dependem da sessão Flask-Login e servem como base para uma i
 - Rotas como `/import` agora agendam jobs em background usando um executor (`app/tasks.py`); o status pode ser consultado em `/import/status/<job_id>`.
 - Há um health check leve em `/healthz` que retorna `{"status":"ok","trace_id":...}`.
 - O logger do Flask foi ajustado para usar formato JSON estruturado com `trace_id` (`X-Request-ID` é propagado nas respostas), facilitando conexão com observabilidade (Stackdriver, Honeycomb, Grafana Loki etc.).
+
+## Infraestrutura e pipeline
+
+- **Docker Compose:** suba `db`, `redis` e app com `docker-compose up --build`. O arquivo `docker-compose.yml` usa Postgres 16 e Redis 8, linkando `DATABASE_URL` e `REDIS_URL` via variáveis de ambiente documentadas em `.env.example`.
+- **Makefile:** `make init` prepara o ambiente (instala dependências e registra hooks). Use `make lint`, `make test` e `make docker-up` para tarefas repetitivas.
+- **Pre-commit & qualidade:** instalamos `black`, `ruff` e `pre-commit`. Rode `pre-commit run --all-files` localmente ou deixe o hook automático cuidar antes do commit.
+- **CI GitHub Actions:** toda PR dispara o workflow `.github/workflows/ci.yml` que instala dependências, roda `black --check`, `ruff check` e a suíte `pytest` com `SECRET_KEY=test-secret`. Essa ação garante que o padrão "Big Tech" de qualidade não quebre.
