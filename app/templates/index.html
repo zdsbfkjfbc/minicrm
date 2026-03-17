@@ -2,57 +2,54 @@
 
 {% block content %}
 
-<div class="glass-panel">
-    <p class="hero-title">Atendimentos</p>
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; margin-top:10px;">
-        <p style="margin:0; color: var(--muted);">Olá, {{ current_user.username }} · {{ current_user.role }}</p>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <a href="{{ url_for('import_csv') }}" class="btn-primary">Importar</a>
-            <a href="{{ url_for('new_contact') }}" class="btn-primary" style="background:#0f172a; border:1px solid var(--border); color:var(--fg);">Novo contato</a>
+<div class="flash-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+            <p style="margin:0; font-size:0.7rem; letter-spacing:0.3em; color:var(--muted);">CADEIA DE ATENDIMENTO</p>
+            <h1 class="hero-title" style="margin:6px 0;">Painel de Operações</h1>
+            <p style="margin:0; color:var(--muted);">{{ current_user.username }} · {{ current_user.role }}</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <a href="{{ url_for('import_csv') }}" class="btn-pill btn-primary">Importar</a>
+            <a href="{{ url_for('new_contact') }}" class="btn-pill btn-secondary">Novo contato</a>
         </div>
     </div>
-    {% if metrics.inactive > 0 %}
-    <div class="flash-container" style="margin-top:20px;">
-        <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent);">notifications_active</span>
-        <span style="margin-left:10px; font-size:0.8rem;">{{ metrics.inactive }} clientes aguardando há {{ metrics.inactive_days }} dias sem resposta.</span>
-    </div>
-    {% endif %}
 </div>
 
-<div class="stats-grid">
-    {% for label, value, color in [
-        ('Total', metrics.total, ''),
-        ('Pendentes', metrics.pendentes, ''),
-        ('Resolvidos', metrics.resolvidos, ''),
-        ('Em atraso', metrics.overdue, ''),
+<div class="flash-grid">
+    {% for label, value in [
+        ('Total', metrics.total),
+        ('Pendentes', metrics.pendentes),
+        ('Resolvidos', metrics.resolvidos),
+        ('Em atraso', metrics.overdue),
     ] %}
-    <div class="metric-card">
-        <h3>{{ label }}</h3>
-        <div class="value" style="color: {% if label == 'Em atraso' %} #ff5d6c {% else %} var(--fg) {% endif %};">{{ value }}</div>
+    <div class="flash-card">
+        <p style="margin:0; font-size:0.65rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted);">{{ label }}</p>
+        <p style="margin:14px 0 0; font-size:2rem; font-weight:600;">{{ value }}</p>
     </div>
     {% endfor %}
 </div>
 
-<div class="glass-panel" style="margin-top:24px;">
-    <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:24px;">
-        <form method="get" action="{{ url_for('index') }}" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-            <input name="search" value="{{ search_query }}" placeholder="Buscar cliente" style="border:1px solid var(--border); border-radius:12px; padding:10px 14px; background:transparent; color:var(--fg);" />
-            <select name="status" style="border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:transparent; color:var(--fg);">
+<div class="glass-panel">
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:18px;">
+        <form method="get" action="{{ url_for('index') }}" style="display:flex; gap:12px; flex-wrap:wrap;">
+            <input name="search" value="{{ search_query }}" placeholder="Buscar cliente" style="border:1px solid var(--line); border-radius:12px; padding:10px 14px; background:#fafbff; color:var(--text);" />
+            <select name="status" style="border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fafbff; color:var(--text);">
                 <option value="Todos" {% if status_filter=='Todos' %}selected{% endif %}>Todos</option>
                 <option value="Aberto" {% if status_filter=='Aberto' %}selected{% endif %}>Aberto</option>
                 <option value="Aguardando Cliente" {% if status_filter=='Aguardando Cliente' %}selected{% endif %}>Aguardando</option>
                 <option value="Resolvido" {% if status_filter=='Resolvido' %}selected{% endif %}>Resolvido</option>
                 <option value="Cancelado" {% if status_filter=='Cancelado' %}selected{% endif %}>Cancelado</option>
             </select>
-            <select name="sort" style="border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:transparent; color:var(--fg);">
+            <select name="sort" style="border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fafbff; color:var(--text);">
                 <option value="deadline_asc" {% if sort_by=='deadline_asc' %}selected{% endif %}>Prazo ↑</option>
                 <option value="deadline_desc" {% if sort_by=='deadline_desc' %}selected{% endif %}>Prazo ↓</option>
                 <option value="created_desc" {% if sort_by=='created_desc' %}selected{% endif %}>Recentes</option>
             </select>
         </form>
-        <div style="margin-left:auto; display:flex; gap:12px; flex-wrap:wrap;">
-            <a href="{{ url_for('export_contacts', fmt='csv', status=status_filter, search=search_query, sort=sort_by) }}" class="btn-primary" style="background:transparent; color:var(--accent); border:1px solid var(--border);">Exportar CSV</a>
-            <a href="{{ url_for('export_contacts', fmt='xlsx', status=status_filter, search=search_query, sort=sort_by) }}" class="btn-primary" style="background:transparent; color:var(--accent); border:1px solid var(--border);">Excel</a>
+        <div style="display:flex; gap:10px;">
+            <a href="{{ url_for('export_contacts', fmt='csv', status=status_filter, search=search_query, sort=sort_by) }}" class="btn-pill btn-secondary">CSV</a>
+            <a href="{{ url_for('export_contacts', fmt='xlsx', status=status_filter, search=search_query, sort=sort_by) }}" class="btn-pill btn-secondary">XLSX</a>
         </div>
     </div>
 
@@ -74,37 +71,29 @@
                 <tr>
                     <td>
                         <strong>{{ contact.customer_name }}</strong>
-                        <div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">#{{ contact.id }}</div>
+                        <div style="font-size:0.75rem; color:var(--muted);">#{{ contact.id }}</div>
                     </td>
                     {% if current_user.role == 'Gestor' %}
                     <td>{{ contact.owner.username if contact.owner else '—' }}</td>
                     {% endif %}
                     <td><span class="highlight-pill">{{ contact.status }}</span></td>
                     <td>
-                        {% if contact.deadline %}
-                        {{ contact.deadline.strftime('%d/%m/%Y') }}
-                        {% else %}
-                        —
-                        {% endif %}
+                        {% if contact.deadline %}{{ contact.deadline.strftime('%d/%m/%Y') }}{% else %}—{% endif %}
                     </td>
                     <td>{{ contact.observations or 'Nenhuma observação' }}</td>
-                    <td>
-                        <a href="{{ url_for('view_contact', contact_id=contact.id) }}" class="btn-primary" style="background:transparent; color:var(--fg); border:1px solid var(--border);">Ver</a>
-                    </td>
+                    <td><a href="{{ url_for('view_contact', contact_id=contact.id) }}" class="btn-pill btn-secondary" style="padding:5px 12px;">Ver</a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
-                <tr>
-                    <td colspan="6" style="text-align:center; color:var(--muted); padding:28px;">Nenhum registro encontrado.</td>
-                </tr>
+                <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:32px;">Nenhum registro encontrado.</td></tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
 
-    <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:0.75rem; color:var(--muted);">
-        <span>Pág. {{ contacts.page }} / {{ contacts.pages }}</span>
-        <span>Total de {{ contacts.total }} registros</span>
+    <div style="display:flex; justify-content:space-between; margin-top:16px; font-size:0.75rem; color:var(--muted);">
+        <span>Pág {{ contacts.page }} de {{ contacts.pages }}</span>
+        <span>{{ contacts.total }} registros</span>
     </div>
 </div>
 

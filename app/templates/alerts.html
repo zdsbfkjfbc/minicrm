@@ -2,26 +2,20 @@
 
 {% block content %}
 
-<div class="glass-panel" style="padding:32px;">
-    <p class="hero-title" style="margin-bottom:8px;">Alertas</p>
-    <p style="margin:0; color:var(--muted); font-size:0.85rem;">Últimos 50 webhooks recebidos</p>
-    <div style="margin-top:24px;">
+<div class="glass-panel">
+    <p class="hero-title">Alertas em destaque</p>
+    <p style="margin:6px 0 12px; color:var(--muted);">Monitoramento ativo dos webhooks mais recentes</p>
+    <div style="display:flex; flex-direction:column; gap:12px;">
         {% if alerts %}
         {% for alert in alerts %}
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--border); gap:16px;">
-            <div>
-                <p style="margin:0; font-weight:600;">{{ alert.action }}</p>
-                <p style="margin:4px 0 0; font-size:0.75rem; color:var(--muted);">{{ alert.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
-            </div>
-            <div style="flex:1; font-size:0.75rem; color:var(--muted); text-align:right;">
-                {{ alert.details }}
-            </div>
+        <div style="padding:16px; border-radius:14px; border:1px solid var(--line); background:#fff;">
+            <div style="font-size:0.85rem; font-weight:600;">{{ alert.action }}</div>
+            <div style="font-size:0.75rem; color:var(--muted); margin:6px 0;">{{ alert.timestamp.strftime('%d/%m/%Y %H:%M') }}</div>
+            <p style="margin:0; color:var(--muted);">{{ alert.details }}</p>
         </div>
-        {% else %}
-        {% endif %}
         {% endfor %}
         {% else %}
-        <p style="text-align:center; color:var(--muted); padding:32px 0;">Nenhum alerta registrado.</p>
+        <p style="text-align:center; margin:28px 0; color:var(--muted);">Nenhum alerta registrado.</p>
         {% endif %}
     </div>
 </div>

@@ -14,28 +14,19 @@
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --border: #d3d6dc;
-            --muted: #6c6f7a;
-            --fg: #111827;
-            --bg: #f8f9fb;
-            --surface: #ffffff;
-            --accent: #ff6b5f;
-            --glass: rgba(255, 255, 255, 0.6);
-        }
-
-        .dark {
-            --border: #373c4a;
-            --muted: #a5abb8;
-            --fg: #f7f8fb;
-            --bg: #05060a;
-            --surface: #0f111a;
-            --accent: #ff9a7c;
-            --glass: rgba(20, 24, 42, 0.8);
+            --base-bg: #f5f5fb;
+            --panel-bg: #fff;
+            --line: #e0e3ed;
+            --text: #0f1b35;
+            --muted: #677285;
+            --accent: #ff7849;
+            --accent-strong: #ff4d2f;
+            --shadow-soft: 0 25px 60px rgba(19, 24, 44, 0.08);
         }
 
         *, *::before, *::after {
@@ -44,116 +35,130 @@
 
         body {
             margin: 0;
-            font-family: 'Space Grotesk', 'JetBrains Mono', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
             min-height: 100vh;
+            background: var(--base-bg);
+            color: var(--text);
+            font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
         }
 
-        header, .glass-panel, table {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .app-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 60px;
         }
 
-        header:hover, .glass-panel:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 28px;
+            border-radius: 18px;
+            background: var(--panel-bg);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
+            gap: 12px;
+            position: relative;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 120, 73, 0.15), rgba(255, 255, 255, 0));
+            pointer-events: none;
+        }
+
+        .brand-mark {
+            font-family: 'Unbounded', serif;
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+        }
+
+        nav {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            padding-bottom: 4px;
+            transition: border 0.2s ease;
+        }
+
+        nav a:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .identity {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+        }
+
+        .identity span {
+            opacity: 0.8;
+        }
+
+        .btn-pill {
+            border: 0;
+            padding: 10px 18px;
+            border-radius: 999px;
+            letter-spacing: 0.2em;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-family: 'Unbounded', sans-serif;
+            cursor: pointer;
+            transition: transform 0.25s ease;
         }
 
         .btn-primary {
-            font-family: 'Unbounded', 'Space Grotesk', sans-serif;
-            padding: 10px 20px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, var(--accent), #ff956b);
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
             color: #fff;
-            border: none;
-            cursor: pointer;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            box-shadow: 0 10px 20px rgba(255, 107, 95, 0.35);
+            box-shadow: 0 20px 35px rgba(255, 120, 73, 0.35);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-1px) scale(1.01);
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--text);
         }
 
-        .glass-panel {
-            border-radius: 18px;
-            padding: 24px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            box-shadow: 0 25px 60px rgba(15,23,42,0.1);
+        .btn-pill:hover {
+            transform: translateY(-2px);
         }
 
-        .hero-title {
-            font-family: 'Unbounded', serif;
-            font-size: clamp(1.8rem, 3vw, 2.5rem);
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
+        .flash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
         }
 
-        .metric-card {
-            border-radius: 14px;
+        .flash-card {
             padding: 18px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(15,23,42,0.05);
-        }
-
-        .metric-card h3 {
-            margin: 0;
-            font-size: 0.65rem;
-            letter-spacing: 0.3em;
-            color: var(--muted);
-        }
-
-        .metric-card .value {
-            margin-top: 12px;
-            font-size: 2.2rem;
-            font-weight: 600;
-        }
-
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            font-size: 0.85rem;
-        }
-
-        th, td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            text-transform: uppercase;
-            font-size: 0.65rem;
-            letter-spacing: 0.25em;
-            color: var(--muted);
-        }
-
-        .highlight-pill {
-            display: inline-flex;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            font-size: 0.7rem;
-        }
-
-        .flash-container {
-            margin: 24px 0;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 14px 18px;
-            background: var(--surface);
+            border-radius: 16px;
+            background: var(--panel-bg);
+            border: 1px solid var(--line);
+            box-shadow: 0 20px 45px rgba(19, 24, 44, 0.08);
         }
 
         footer {
-            margin-top: 60px;
-            font-size: 0.75rem;
             text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
             color: var(--muted);
         }
     </style>

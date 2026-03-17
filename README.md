@@ -77,6 +77,9 @@ Ambos os endpoints dependem da sessão Flask-Login e servem como base para uma i
 - `GET /alerts` mostra aos Gestores os últimos 50 eventos de webhook e serve como base para dashboards SLA ou integrações externas.
 - Runbook curto: se o job de importação ficar travado ou muitos alertas chegarem com erro, verifique `logs/minicrm.log`, rode `docker-compose restart web` e dispare um webhook de teste para confirmar o canal.
 
+## Evolução visual
+- Mantivemos a paleta neutra com acentos laranja e expandimos a hierarquia tipográfica usando `Space Grotesk` e `Unbounded` para títulos e botões. Espaçamentos respiram melhor, cards ganharam sombras suaves e bordas arredondadas, e micro-interações (`btn-pill` hover, tabelas com destaque) reforçam o acabamento sem romper o layout original. A experiência segue o tom editorial recomendado pelo `SKILL.md`, sem transformar totalmente a interface.
+
 ## Infraestrutura e pipeline
 
 - **Docker Compose:** suba `db`, `redis` e app com `docker-compose up --build`. O arquivo `docker-compose.yml` usa Postgres 16 e Redis 8, linkando `DATABASE_URL` e `REDIS_URL` via variáveis de ambiente documentadas em `.env.example`.
