@@ -1,4 +1,5 @@
-from flask import render_template, flash, redirect, url_for, request, Response, abort
+from flask import (render_template, flash, redirect, url_for, request, Response,
+                   abort)
 from flask_login import current_user, login_user, logout_user, login_required
 from app import db
 from app.models import User, Contact, AuditLog, SystemSettings
@@ -9,6 +10,7 @@ from app.services.auth import clear_login_failures, is_login_blocked, register_l
 from app.services.system import get_setting
 from app.services.utils import (format_datetime_brt, sanitize_for_spreadsheet,
                                 sanitize_html)
+from app.tasks import enqueue_import_job, get_job_status
 from flask import current_app as app
 from sqlalchemy import desc, asc, func
 from datetime import date, datetime, timedelta, timezone
@@ -767,72 +769,17 @@ def import_csv():
     form = ImportForm()
     if form.validate_on_submit():
         file = form.csv_file.data
-        try:
-            # Read file as string
-            stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
-            csv_input = csv.reader(stream)
-            
-            headers = next(csv_input, None) # Skip header row
-            expected_headers = ['Cliente', 'Status', 'Data Limite (YYYY-MM-DD)', 'Observações']
-            
-            # Very basic validation that it's the right file shape
-            if not headers or len(headers) < 2:
-                flash('O arquivo selecionado não parece ser um CSV válido.', 'error')
-                return redirect(url_for('import_csv'))
-                
-            errors = []
-            contacts_to_add = []
-            
-            for i, row in enumerate(csv_input, start=2): # Start=2 because line 1 is header
-                if len(row) == 0 or not row[0].strip():
-                    continue # Empty row
-                    
-                customer_name = sanitize_html(row[0].strip())
-                status = sanitize_html(row[1].strip()) if len(row) > 1 and row[1].strip() else 'Aberto'
-                
-                # Default values normalization for status
-                status_capitalized = status.title()
-                if status_capitalized not in ALLOWED_STATUSES:
-                    status_capitalized = 'Aberto' # Fallback
-                
-                # Parse date
-                deadline_date = None
-                if len(row) > 2 and row[2].strip():
-                    try:
-                        deadline_date = datetime.strptime(row[2].strip(), '%Y-%m-%d').date()
-                    except ValueError:
-                        errors.append(f"Linha {i}: Formato de data inválido ('{row[2].strip()}'). Use YYYY-MM-DD.")
-                        continue # Pula a criação, mas continua varrendo para pegar mais erros
-                        
-                observations = sanitize_html(row[3].strip()) if len(row) > 3 else ''
-
-                new_contact = Contact(
-                    customer_name=customer_name,
-                    status=status_capitalized,
-                    deadline=deadline_date,
-                    observations=observations,
-                    user_id=current_user.id # Usando user_id para compatibilidade com bulk_save_objects
-                )
-                contacts_to_add.append(new_contact)
-                
-            if errors:
-                flash(f'A importação falhou. Foram encontrados {len(errors)} erros:', 'error')
-                for err in errors[:5]: # Mostrar max 5 erros
-                    flash(err, 'error')
-                if len(errors) > 5:
-                    flash(f'...e mais {len(errors) - 5} erros adicionais.', 'error')
-                return redirect(url_for('import_csv'))
-                
-            db.session.bulk_save_objects(contacts_to_add)
-            db.session.commit()
-            
-            app.logger.info(f"{len(contacts_to_add)} contatos importados via CSV por {current_user.username}")
-            flash(f'{len(contacts_to_add)} contatos foram importados com sucesso!')
-            return redirect(url_for('index'))
-            
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(f"Erro ao processar arquivo CSV por {current_user.username}: {str(e)}", exc_info=True)
-            flash(f'Ocorreu um erro ao processar o arquivo: {str(e)}', 'error')
-            
+        content = file.stream.read().decode("UTF8")
+        job_id = enqueue_import_job(content, current_user.id)
+        flash(f'Importação agendada (job {job_id}).', 'info')
+        return redirect(url_for('import_status', job_id=job_id))
     return render_template('import.html', title='Importar Clientes', form=form)
+
+
+@app.route('/import/status/<job_id>')
+@login_required
+def import_status(job_id):
+    status = get_job_status(job_id, current_user.id)
+    if status is None:
+        abort(404)
+    return render_template('import_status.html', job_id=job_id, status=status)

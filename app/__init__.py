@@ -1,12 +1,15 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from flask_migrate import Migrate
+import json
 import logging
-from logging.handlers import RotatingFileHandler
-
 import os
 import sys
+import uuid
+from logging.handlers import RotatingFileHandler
+
+from flask import Flask, g, jsonify, request
+from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
 # Adiciona a raiz do projeto ao path para que o Python/Linter encontre o config.py
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import Config
@@ -29,6 +32,20 @@ def create_app(config_class=Config):
         from datetime import timezone, timedelta
         from app.forms import LogoutForm
 
+        class JSONFormatter(logging.Formatter):
+            def format(self, record):
+                trace_id = getattr(record, 'trace_id', g.get('trace_id', None) if 'g' in globals() else None)
+                payload = {
+                    'time': self.formatTime(record, self.datefmt),
+                    'level': record.levelname,
+                    'message': record.getMessage(),
+                    'logger': record.name,
+                    'trace_id': trace_id,
+                }
+                if record.exc_info:
+                    payload['exception'] = self.formatException(record.exc_info)
+                return json.dumps(payload, default=str)
+
         @app.template_filter('brt')
         def to_brt(dt):
             """Converte datetime UTC para Horário de Brasília (UTC-3) e formata."""
@@ -42,22 +59,32 @@ def create_app(config_class=Config):
         def inject_logout_form():
             return {'logout_form': LogoutForm()}
 
+        @app.before_request
+        def attach_trace_id():
+            trace_id = request.headers.get('X-Request-ID') or str(uuid.uuid4())
+            g.trace_id = trace_id
+
+        @app.after_request
+        def add_header(response):
+            response.headers['X-Request-ID'] = getattr(g, 'trace_id', '')
+            return response
+
         from app import models, views
         from app.api.v1.contacts import bp as api_v1_bp
         app.register_blueprint(api_v1_bp)
-        
-        # Ocultar criação de banco via código para usar migrações
-        # db.create_all()  
-        
-        # Configurar Logging de Produção
+
+        # Logging de Produção estruturado
         if not app.debug and not app.testing:
-            if not os.path.exists('logs'):
-                os.mkdir('logs')
-            file_handler = RotatingFileHandler('logs/minicrm.log', maxBytes=10240, backupCount=10)
-            file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-            file_handler.setLevel(logging.INFO)
-            app.logger.addHandler(file_handler)
+            formatter = JSONFormatter()
+            console_handler = RotatingFileHandler('logs/minicrm.log', maxBytes=10240, backupCount=10)
+            console_handler.setFormatter(formatter)
+            console_handler.setLevel(logging.INFO)
+            app.logger.addHandler(console_handler)
             app.logger.setLevel(logging.INFO)
             app.logger.info('MiniCRM startup')
+
+    @app.route('/healthz')
+    def healthz():
+        return jsonify({'status': 'ok', 'trace_id': getattr(g, 'trace_id', '')})
 
     return app

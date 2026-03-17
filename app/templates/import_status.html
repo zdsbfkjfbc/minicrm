@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-sm text-center" style="color: var(--muted);">
+    <h1 class="text-lg font-bold" style="color: var(--fg);">Status da Importação</h1>
+    <p class="mt-4">Job <strong>{{ job_id }}</strong></p>
+    <p class="mt-2">Situação atual: <strong style="color: var(--fg);">{{ status }}</strong></p>
+    <p class="text-xs mt-4">As importações são processadas em background; atualize esta página para verificar o progresso.</p>
+    <a href="{{ url_for('import_csv') }}"
+        class="mt-6 inline-flex items-center justify-center px-4 py-2 border text-xs font-medium clip hover:opacity-70 transition-opacity"
+        style="border-color: var(--fg); color: var(--fg);">
+        Voltar
+    </a>
+</div>
+{% endblock %}

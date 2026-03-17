@@ -66,3 +66,8 @@ O projeto expõe um Blueprint `api_v1` que responde em `/api/v1/*`:
 - `GET /api/v1/metrics`: retorna métricas agregadas (total, pendentes, resolvidos, cancelados, aguardando e atrasados) respeitando o papel do usuário.
 
 Ambos os endpoints dependem da sessão Flask-Login e servem como base para uma interface API/serviço no futuro.
+
+## Jobs e observabilidade
+- Rotas como `/import` agora agendam jobs em background usando um executor (`app/tasks.py`); o status pode ser consultado em `/import/status/<job_id>`.
+- Há um health check leve em `/healthz` que retorna `{"status":"ok","trace_id":...}`.
+- O logger do Flask foi ajustado para usar formato JSON estruturado com `trace_id` (`X-Request-ID` é propagado nas respostas), facilitando conexão com observabilidade (Stackdriver, Honeycomb, Grafana Loki etc.).
