@@ -1,31 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold" style="color: var(--fg);">Alertas de Webhook</h2>
-        <p class="text-xs" style="color: var(--muted);">Registros dos últimos 50 eventos</p>
-    </div>
 
-    <div class="border rounded">
-        <div class="grid grid-cols-4 px-4 py-2 text-[10px] uppercase tracking-widest" style="color: var(--muted);">
-            <span>Data</span>
-            <span>Usuário</span>
-            <span>Alvo</span>
-            <span>Detalhes</span>
-        </div>
+<div class="hero-grid">
+    <div class="hero-card">
+        <p class="text-xs" style="letter-spacing:0.35em;">SINAL DOS GESTORES</p>
+        <h2 class="text-2xl font-bold" style="margin-top:12px;">Alertas de integração</h2>
+        <p style="color: var(--muted); margin-top:12px;">Últimos 50 eventos registrados</p>
+    </div>
+    <div class="hero-card">
+        <p style="font-size:0.75rem; letter-spacing:0.3em;">AUDIT LOG</p>
+        <p class="value" style="margin-top:12px;">{{ alerts|length }}</p>
+        <p style="color: var(--muted); margin-top:6px;">Eventos nesta sessão</p>
+    </div>
+</div>
+
+<div class="glass-panel" style="margin-top:24px;">
+    <div class="stats-grid">
         {% for alert in alerts %}
-        <div class="grid grid-cols-4 px-4 py-3 border-t" style="color: var(--fg);">
-            <span class="text-[12px]">{{ alert.timestamp.strftime('%d/%m/%Y %H:%M') }}</span>
-            <span class="text-[12px]">{{ alert.user_id or 'system' }}</span>
-            <span class="text-[12px]">{{ alert.target_type }}</span>
-            <span class="text-[12px] truncate" title="{{ alert.details }}">{{ alert.details }}</span>
+        <div style="display:flex; justify-content:space-between; gap:12px; padding:18px; border-bottom:1px solid rgba(255,255,255,0.07);">
+            <div>
+                <p style="margin:0; font-weight:600;">{{ alert.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p style="margin:4px 0 0; color:var(--muted); font-size:0.75rem;">{{ alert.user_id or 'system' }} · {{ alert.action }}</p>
+            </div>
+            <div style="flex:1; text-align:right;">
+                <p style="margin:0; font-size:0.75rem; color:var(--muted);">{{ alert.target_type }}</p>
+                <p style="margin:6px 0 0; font-size:0.75rem; max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ alert.details }}</p>
+            </div>
         </div>
         {% else %}
-        <div class="px-4 py-6 text-center text-xs" style="color: var(--muted);">
-            Nenhum alerta recebido ainda.
-        </div>
+        <p style="padding:28px; text-align:center; color:var(--muted);">Nenhum alerta registrado.</p>
         {% endfor %}
     </div>
 </div>
+
 {% endblock %}

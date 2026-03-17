@@ -6,161 +6,256 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>{{ title }} — MiniCRM</title>
 
-    <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet" />
-
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    fontFamily: { display: ["JetBrains Mono", "monospace"] },
-                    borderRadius: { DEFAULT: "0rem", lg: "0rem", xl: "0rem", "2xl": "0rem", full: "9999px" },
-                    transitionDuration: { DEFAULT: "200ms" },
-                },
-            },
-        };
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --border: #e0e0e0;
-            --muted: #888888;
-            --fg: #111111;
-            --bg: #fafafa;
-            --surface: #f3f3f3;
-            --accent: #111111;
-        }
-
-        .dark {
-            --border: #2a2a2a;
-            --muted: #666666;
-            --fg: #f0f0f0;
-            --bg: #0a0a0a;
-            --surface: #141414;
-            --accent: #f0f0f0;
+            --bg-dark: #050b1a;
+            --bg-gradient: linear-gradient(135deg, rgba(42, 77, 255, 0.25) 0%, rgba(255, 92, 92, 0.2) 60%, rgba(15, 16, 38, 0.9) 100%);
+            --surface: rgba(8, 12, 30, 0.85);
+            --panel: rgba(255, 255, 255, 0.05);
+            --fg: #f4f7ff;
+            --muted: rgba(255, 255, 255, 0.65);
+            --accent: #ff5d6c;
+            --accent-subtle: rgba(255, 93, 108, 0.25);
+            --border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 25px 60px rgba(3, 7, 19, 0.6);
         }
 
         * {
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: var(--bg);
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            background: var(--bg-dark);
             color: var(--fg);
         }
 
-        input,
-        select,
-        textarea,
-        button {
-            font-family: 'JetBrains Mono', monospace;
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: var(--bg-gradient);
+            z-index: -2;
         }
 
-        input::placeholder,
-        textarea::placeholder {
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 15% 20%, rgba(255, 93, 108, 0.25), transparent 45%),
+                        radial-gradient(circle at 75% 10%, rgba(62, 207, 255, 0.25), transparent 40%);
+            z-index: -1;
+            filter: blur(30px);
+            opacity: 0.8;
+        }
+
+        .app-shell {
+            width: min(1200px, 100%);
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 24px;
+            border-radius: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% -10%, rgba(255, 93, 108, 0.35), transparent 50%);
+            opacity: 0.6;
+        }
+
+        .brand-mark {
+            font-family: 'Unbounded', 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 2vw, 2rem);
+            letter-spacing: 0.3rem;
+            text-transform: uppercase;
+            color: #fefefe;
+        }
+
+        nav a, nav button {
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 10px 20px rgba(255, 93, 108, 0.4);
+        }
+
+        button.primary:hover {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .flash-pillar {
+            margin: 24px 0;
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid var(--accent-subtle);
+            background: rgba(255, 255, 255, 0.03);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            margin-top: 64px;
+            text-align: center;
+            font-size: 0.75rem;
             color: var(--muted);
         }
 
-        select option {
-            background-color: var(--bg);
-            color: var(--fg);
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 40px 0;
         }
 
-        .clip {
-            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+        .stats-card {
+            border-radius: 16px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
         }
 
-        .flash-neutral {
-            border-color: var(--border);
+        .stats-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, var(--accent-subtle), transparent 60%);
+            opacity: 0.6;
+        }
+
+        .stats-card h3 {
+            margin: 0;
+            font-family: 'Unbounded', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
             color: var(--muted);
         }
 
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-            line-height: 1;
+        .stats-card .value {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            margin-top: 16px;
+            font-weight: 700;
+        }
+
+        .glass-panel {
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .hero-card {
+            border-radius: 18px;
+            padding: 24px;
+            background: rgba(15, 18, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card b {
+            color: var(--accent);
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(62, 207, 255, 0.35), transparent 55%);
+            opacity: 0.4;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body class="min-h-screen antialiased">
-    <div class="max-w-[1200px] mx-auto px-5 lg:px-10">
+    <div class="app-shell">
 
         <!-- Navbar -->
-        <header class="flex items-center justify-between h-14 border-b" style="border-color: var(--border);">
-            <a href="{{ url_for('index') }}"
-                class="flex items-center gap-2.5 hover:opacity-60 transition-opacity duration-200">
-                <div class="size-4 border-2" style="border-color: var(--fg);"></div>
-                <span class="text-sm font-bold tracking-tight" style="color: var(--fg);">MiniCRM</span>
-            </a>
-
-            <div class="flex items-center gap-5">
+        <header>
+            <div>
+                <div class="brand-mark">NOVA HORA</div>
+                <p class="text-xs" style="color: var(--muted); margin-top: 6px;">
+                    Operações e alertas orquestrados com precisão
+                </p>
+            </div>
+            <nav>
+                <a href="{{ url_for('index') }}">Painel</a>
+                {% if current_user.is_authenticated and current_user.role == 'Gestor' %}
+                <a href="{{ url_for('dashboard') }}">Métricas</a>
+                <a href="{{ url_for('audit_logs') }}">Auditoria</a>
+                <a href="{{ url_for('system_settings') }}">Configurações</a>
+                {% endif %}
+                <a href="{{ url_for('import_csv') }}">Importar</a>
+            </nav>
+            <div style="display:flex;align-items:center;gap:10px;">
                 {% if current_user.is_authenticated %}
-                <nav class="hidden md:flex items-center gap-5">
-                    <a href="{{ url_for('index') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--fg);">Painel</a>
-                    {% if current_user.role == 'Gestor' %}
-                    <a href="{{ url_for('dashboard') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Métricas</a>
-                    <a href="{{ url_for('audit_logs') }}"
-                        class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Auditoria</a>
-                    <a href="{{ url_for('system_settings') }}"
-                        class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Configurações</a>
-                    {% endif %}
-                    <a href="{{ url_for('import_csv') }}"
-                        class="text-xs font-medium hover:opacity-60 transition-opacity"
-                        style="color: var(--muted);">Importar</a>
-                </nav>
-
-                <div class="h-5 w-px" style="background: var(--border);"></div>
-
-                <div class="hidden sm:flex flex-col items-end">
-                    <span class="text-xs font-bold" style="color: var(--fg);">{{ current_user.username }}</span>
-                    <span class="text-[10px]" style="color: var(--muted);">{{ current_user.role }}</span>
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem;font-weight:600;">{{ current_user.username }}</div>
+                    <div style="font-size:0.7rem;color:var(--muted);">{{ current_user.role }}</div>
                 </div>
-
-                <form action="{{ url_for('logout') }}" method="post"
-                    class="flex items-center gap-1.5 text-xs font-medium hover:opacity-60 transition-opacity"
-                    style="color: var(--muted);">
+                <form action="{{ url_for('logout') }}" method="post">
                     {{ logout_form.hidden_tag() }}
-                    <button type="submit" class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">logout</span>
-                        <span class="hidden sm:inline">Sair</span>
+                    <button type="submit" class="primary">
+                        <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
                     </button>
                 </form>
                 {% else %}
-                <a href="{{ url_for('login') }}" class="text-xs font-medium hover:opacity-60 transition-opacity"
-                    style="color: var(--muted);">Entrar</a>
-                <a href="{{ url_for('register') }}"
-                    class="px-3 py-1.5 border text-xs font-medium clip hover:opacity-70 transition-opacity"
-                    style="border-color: var(--fg); color: var(--fg);">Cadastrar</a>
+                <a href="{{ url_for('login') }}" class="primary">Entrar</a>
                 {% endif %}
-
-                <!-- Toggle tema -->
-                <button onclick="
-                document.documentElement.classList.toggle('dark');
-                const isDark = document.documentElement.classList.contains('dark');
-                localStorage.theme = isDark ? 'dark' : 'light';
-                document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
-            " class="flex items-center justify-center hover:opacity-50 transition-opacity" style="color: var(--muted);"
-                    title="Alternar tema">
-                    <span id="theme-icon" class="material-symbols-outlined text-[18px]">dark_mode</span>
-                </button>
             </div>
         </header>
 
