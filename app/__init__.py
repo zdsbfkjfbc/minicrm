@@ -43,6 +43,8 @@ def create_app(config_class=Config):
             return {'logout_form': LogoutForm()}
 
         from app import models, views
+        from app.api.v1.contacts import bp as api_v1_bp
+        app.register_blueprint(api_v1_bp)
         
         # Ocultar criação de banco via código para usar migrações
         # db.create_all()  

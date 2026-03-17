@@ -5,80 +5,21 @@ from app.models import User, Contact, AuditLog, SystemSettings
 from app.forms import (ContactForm, DeleteContactForm, ImportForm,
                        LoginForm, LogoutForm, RegistrationForm,
                        SystemSettingsForm)
+from app.services.auth import clear_login_failures, is_login_blocked, register_login_failure
+from app.services.system import get_setting
+from app.services.utils import (format_datetime_brt, sanitize_for_spreadsheet,
+                                sanitize_html)
 from flask import current_app as app
 from sqlalchemy import desc, asc, func
 from datetime import date, datetime, timedelta, timezone
 import csv
 import io
-import re
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 
 ALLOWED_STATUSES = {'Aberto', 'Aguardando Cliente', 'Resolvido', 'Cancelado'}
-MAX_LOGIN_ATTEMPTS = 5
-LOGIN_WINDOW_MINUTES = 15
-LOGIN_BLOCK_MINUTES = 15
 LOGIN_ATTEMPTS: dict[tuple[str, str], list[datetime]] = {}
 
-
-def _client_ip() -> str:
-    forwarded = request.headers.get('X-Forwarded-For', '')
-    if forwarded:
-        return forwarded.split(',')[0].strip()
-    return request.remote_addr or 'unknown'
-
-
-def _purge_old_attempts(now: datetime):
-    cutoff = now - timedelta(minutes=LOGIN_WINDOW_MINUTES)
-    for key in list(LOGIN_ATTEMPTS.keys()):
-        fresh = [ts for ts in LOGIN_ATTEMPTS[key] if ts >= cutoff]
-        if fresh:
-            LOGIN_ATTEMPTS[key] = fresh
-        else:
-            del LOGIN_ATTEMPTS[key]
-
-
-def _is_login_blocked(username: str) -> tuple[bool, int]:
-    now = datetime.now(timezone.utc)
-    _purge_old_attempts(now)
-    key = (_client_ip(), username.strip().lower())
-    attempts = LOGIN_ATTEMPTS.get(key, [])
-    if len(attempts) < MAX_LOGIN_ATTEMPTS:
-        return False, 0
-    first_attempt = attempts[0]
-    blocked_until = first_attempt + timedelta(minutes=LOGIN_BLOCK_MINUTES)
-    if blocked_until <= now:
-        LOGIN_ATTEMPTS.pop(key, None)
-        return False, 0
-    retry_seconds = int((blocked_until - now).total_seconds())
-    return True, max(retry_seconds, 1)
-
-
-def _register_login_failure(username: str):
-    now = datetime.now(timezone.utc)
-    _purge_old_attempts(now)
-    key = (_client_ip(), username.strip().lower())
-    LOGIN_ATTEMPTS.setdefault(key, []).append(now)
-
-
-def _clear_login_failures(username: str):
-    LOGIN_ATTEMPTS.pop((_client_ip(), username.strip().lower()), None)
-
-
-def sanitize_for_spreadsheet(value):
-    if not isinstance(value, str):
-        return value
-    stripped = value.lstrip()
-    if stripped.startswith(('=', '+', '-', '@')):
-        return f"'{value}"
-    return value
-
-def sanitize_html(text):
-    if not text:
-        return text
-    # Remove qualquer tag HTML grosseira (ex: <script>, <b>, <img>, etc)
-    clean = re.compile('<.*?>')
-    return re.sub(clean, '', text)
 
 
 def record_audit(action: str, target_type: str, target_id: int | None = None, details: str | None = None):
@@ -92,11 +33,6 @@ def record_audit(action: str, target_type: str, target_id: int | None = None, de
     )
     db.session.add(log)
 
-
-def get_setting(key: str, default: str = '') -> str:
-    """Retorna o valor de uma configuração do sistema."""
-    setting = SystemSettings.query.filter_by(key=key).first()
-    return setting.value if setting else default
 
 
 def _get_contact_or_404(contact_id):
@@ -178,7 +114,7 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        blocked, retry_seconds = _is_login_blocked(form.username.data)
+        blocked, retry_seconds = is_login_blocked(LOGIN_ATTEMPTS, form.username.data)
         if blocked:
             retry_minutes = max(1, retry_seconds // 60)
             flash(f'Muitas tentativas de login. Tente novamente em aproximadamente {retry_minutes} minuto(s).', 'error')
@@ -186,11 +122,11 @@ def login():
 
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            _register_login_failure(form.username.data)
+            register_login_failure(LOGIN_ATTEMPTS, form.username.data)
             app.logger.warning(f"Tentativa de login falha para o usuário: {form.username.data}")
             flash('Usuário ou senha inválidos.')
             return redirect(url_for('login'))
-        _clear_login_failures(form.username.data)
+        clear_login_failures(LOGIN_ATTEMPTS, form.username.data)
         login_user(user, remember=form.remember_me.data)
         app.logger.info(f"Login bem-sucedido: {user.username}")
         return redirect(url_for('index'))
@@ -428,17 +364,6 @@ def export_contacts(fmt):
     # ── Cabeçalho das colunas ────────────────────────────────────────────────
     headers = ['ID', 'Tipo', 'Nome / Razão Social', 'E-mail', 'Telefone', 'Status', 'Responsável', 'Prazo', 'Observações', 'Criado em']
 
-    # ── Fuso horário: UTC → Brasília (UTC-3) ─────────────────────────────────
-    from datetime import timezone, timedelta
-    BRT = timezone(timedelta(hours=-3))
-
-    def fmt_dt(dt):
-        """Converte um datetime UTC para Brasília e formata."""
-        if not dt:
-            return ''
-        dt_brt = dt.replace(tzinfo=timezone.utc).astimezone(BRT)
-        return dt_brt.strftime('%d/%m/%Y %H:%M')
-
     def row_data(c):
         return [
             c.id,
@@ -450,7 +375,7 @@ def export_contacts(fmt):
             sanitize_for_spreadsheet(c.owner.username if c.owner else ''),
             sanitize_for_spreadsheet(c.deadline.strftime('%d/%m/%Y') if c.deadline else ''),
             sanitize_for_spreadsheet(c.observations or ''),
-            sanitize_for_spreadsheet(fmt_dt(c.created_at)),
+            sanitize_for_spreadsheet(format_datetime_brt(c.created_at, '%d/%m/%Y %H:%M')),
         ]
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
@@ -755,14 +680,6 @@ def export_bi():
         flash('Acesso negado.')
         return redirect(url_for('index'))
 
-    from datetime import timezone, timedelta
-    BRT = timezone(timedelta(hours=-3))
-
-    def fmt_dt(dt):
-        if not dt:
-            return ''
-        return dt.replace(tzinfo=timezone.utc).astimezone(BRT).strftime('%Y-%m-%d %H:%M:%S')
-
     contacts = Contact.query.order_by(Contact.created_at.desc()).all()
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
 
@@ -785,7 +702,7 @@ def export_bi():
             sanitize_for_spreadsheet(c.owner.username if c.owner else ''),
             sanitize_for_spreadsheet(c.deadline.strftime('%Y-%m-%d') if c.deadline else ''),
             sanitize_for_spreadsheet(c.observations or ''),
-            sanitize_for_spreadsheet(fmt_dt(c.created_at)),
+            sanitize_for_spreadsheet(format_datetime_brt(c.created_at, '%Y-%m-%d %H:%M:%S')),
             '1' if c.is_overdue() else '0',
         ])
     output.seek(0)

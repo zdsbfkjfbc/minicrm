@@ -58,3 +58,11 @@ O script:
 3. Cria o commit com mensagem no formato `tipo(escopo): resumo`.
 
 Se os testes falharem, o processo é abortado e o repositório permanece no estado anterior; assim você segura a qualidade antes de push.
+
+## API v1
+O projeto expõe um Blueprint `api_v1` que responde em `/api/v1/*`:
+
+- `GET /api/v1/contacts`: lista até 25 contatos mais recentes do usuário autenticado em JSON (id, cliente, status, responsável, prazo e criado_em).
+- `GET /api/v1/metrics`: retorna métricas agregadas (total, pendentes, resolvidos, cancelados, aguardando e atrasados) respeitando o papel do usuário.
+
+Ambos os endpoints dependem da sessão Flask-Login e servem como base para uma interface API/serviço no futuro.
