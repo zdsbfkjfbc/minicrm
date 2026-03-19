@@ -17,6 +17,13 @@ logs/
 .vscode/
 .gemini/
 
+# Developer Notes & Internal Docs
+CLAUDE.md
+SKILL.md
+SYSTEM_DESIGN.md
+ANTIGRAVITY_FASE_POR_FASE.md
+REFERENCIA_COMPLETA.md
+
 # Developer Tools
 context-engineering-kit-master/
 
