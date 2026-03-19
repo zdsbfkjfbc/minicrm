@@ -90,9 +90,25 @@
         </table>
     </div>
 
-    <div class="pagination-summary">
-        <span>Pág {{ contacts.page }} de {{ contacts.pages }}</span>
-        <span>{{ contacts.total }} registros</span>
+    <div class="pagination-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.85rem; color: var(--light-text);">
+        <div class="pagination-summary" style="margin-top: 0;">
+            <span>{{ contacts.total }} registros</span>
+        </div>
+        <div class="pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+            {% if contacts.has_prev %}
+                <a href="{{ url_for('index', page=contacts.prev_num, search=search_query, status=status_filter, sort=sort_by) }}" class="btn-pill btn-secondary btn-compact">Anterior</a>
+            {% else %}
+                <span class="btn-pill btn-secondary btn-compact" style="opacity: 0.5; pointer-events: none;">Anterior</span>
+            {% endif %}
+
+            <span style="margin: 0 8px;">Pág {{ contacts.page }} de {{ contacts.pages }}</span>
+
+            {% if contacts.has_next %}
+                <a href="{{ url_for('index', page=contacts.next_num, search=search_query, status=status_filter, sort=sort_by) }}" class="btn-pill btn-secondary btn-compact">Próxima</a>
+            {% else %}
+                <span class="btn-pill btn-secondary btn-compact" style="opacity: 0.5; pointer-events: none;">Próxima</span>
+            {% endif %}
+        </div>
     </div>
 </div>
 

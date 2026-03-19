@@ -336,6 +336,15 @@
     padding: 10px 14px;
 }
 
+.filter-control option {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.filter-control::placeholder {
+    color: var(--light-text);
+}
+
 .contact-id {
     margin: 4px 0 0;
     font-size: 0.75rem;
