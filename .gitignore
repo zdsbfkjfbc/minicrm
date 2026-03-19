@@ -17,15 +17,27 @@ logs/
 .vscode/
 .gemini/
 
-# Developer Notes & Internal Docs
+# Developer Tools & Configs
+context-engineering-kit-master/
+Makefile
+pyproject.toml
+pyrightconfig.json
+.pre-commit-config.yaml
+.dockerignore
+Dockerfile
+docker-compose.yml
+.github/
+scripts/
+test_data.csv
+.env.example
+
+# Internal Documentation & Audits
+docs/
 CLAUDE.md
 SKILL.md
 SYSTEM_DESIGN.md
 ANTIGRAVITY_FASE_POR_FASE.md
 REFERENCIA_COMPLETA.md
-
-# Developer Tools
-context-engineering-kit-master/
 
 # Build & Executables
 dist/

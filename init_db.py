@@ -10,9 +10,12 @@ with app.app_context():
     db.drop_all()
     db.create_all()
 
-    print("Criando usuário 'Gleison' padrão (Gestor)...")
-    admin = User(username='Gleison', role='Gestor')
-    admin.set_password('Gleison123!')
+    print(f"Criando usuário '{os.environ.get('INITIAL_GEST_USER', 'Gleison')}' padrão (Gestor)...")
+    admin = User(
+        username=os.environ.get('INITIAL_GEST_USER', 'Gleison'), 
+        role='Gestor'
+    )
+    admin.set_password(os.environ.get('INITIAL_GEST_PASSWORD', 'Gleison123!'))
     db.session.add(admin)
 
     print("Criando usuário 'operador1' padrão...")
