@@ -9,6 +9,9 @@ from flask import Flask, g, jsonify, request
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Adiciona a raiz do projeto ao path para que o Python/Linter encontre o config.py
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -27,6 +30,23 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
+
+    # CSP restrito
+    csp = {
+        'default-src': ["'self'"],
+        'script-src': ["'self'", "https://cdn.tailwindcss.com", "https://cdn.jsdelivr.net"],
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        'font-src': ["'self'", "https://fonts.gstatic.com"]
+    }
+    Talisman(app, content_security_policy=csp, force_https=not (app.debug or app.testing))
+    
+    # Limiter
+    Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["1000 per day", "100 per hour"],
+        storage_uri=app.config.get('REDIS_URL') or 'memory://'
+    )
 
     with app.app_context():
         from datetime import timezone, timedelta

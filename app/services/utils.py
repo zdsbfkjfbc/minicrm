@@ -13,10 +13,8 @@ def sanitize_for_spreadsheet(value):
 def sanitize_html(text):
     if not text:
         return text
-    import re
-
-    clean = re.compile('<.*?>')
-    return re.sub(clean, '', text)
+    import bleach
+    return bleach.clean(text, tags=[], attributes={}, strip=True)
 
 
 def format_datetime_brt(dt: datetime, fmt: str = '%d/%m/%Y %H:%M'):

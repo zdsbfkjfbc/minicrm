@@ -13,5 +13,17 @@ app.db
 logs/
 *.log
 
-# VS Code
+# VS Code & Gemini
 .vscode/
+.gemini/
+
+# Developer Tools
+context-engineering-kit-master/
+
+# Build & Executables
+dist/
+build/
+*.spec
+run_desktop.py
+zip_project.py
+minicrm_deploy_seguro.zip
