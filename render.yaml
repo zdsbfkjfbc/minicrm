@@ -13,7 +13,3 @@ services:
         value: run.py
       - key: FLASK_ENV
         value: production
-    disk:
-      name: crm-data
-      mountPath: /data
-      sizeGB: 1
