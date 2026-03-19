@@ -16,8 +16,10 @@ from config import Config
 class TestConfig(Config):
     """Configuração de testes: banco em memória, CSRF desligado."""
     TESTING = True
+    SECRET_KEY = 'test-secret-key-for-pytest'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
+    REDIS_URL = 'memory://'
 
 
 @pytest.fixture(scope='session')
@@ -40,6 +42,11 @@ def reset_db(app):
         user = User(username='testuser', role='Operador')
         user.set_password('testpass')
         db.session.add(user)
+        
+        admin = User(username='admin', role='Gestor')
+        admin.set_password('admin')
+        db.session.add(admin)
+        
         db.session.commit()
 
         yield
