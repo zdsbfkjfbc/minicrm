@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: minicrm
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn run:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_ENV
+        value: production
+    disk:
+      name: crm-data
+      mountPath: /data
+      sizeGB: 1
