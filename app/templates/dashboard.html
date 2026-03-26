@@ -112,18 +112,18 @@
         </section>
     </div>
 
-    <script type="application/json" id="d-donut">{{ donut_data | tojson }}</script>
-    <script type="application/json" id="d-labels">{{ monthly_labels | tojson }}</script>
-    <script type="application/json" id="d-values">{{ monthly_values | tojson }}</script>
-    <script type="application/json" id="d-abertos">{{ monthly_abertos | tojson }}</script>
-    <script type="application/json" id="d-resolvidos">{{ monthly_resolvidos | tojson }}</script>
-    <script type="application/json" id="d-op-names">{{ operator_names | tojson }}</script>
-    <script type="application/json" id="d-op-series">{{ operator_series | tojson }}</script>
-    <script type="application/json" id="d-op-colors">{{ op_colors | tojson }}</script>
-    <script type="application/json" id="d-sla">{{ sla_rate | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-donut">{{ donut_data | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-labels">{{ monthly_labels | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-values">{{ monthly_values | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-abertos">{{ monthly_abertos | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-resolvidos">{{ monthly_resolvidos | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-op-names">{{ operator_names | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-op-series">{{ operator_series | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-op-colors">{{ op_colors | tojson }}</script>
+    <script nonce="{{ csp_nonce() }}" type="application/json" id="d-sla">{{ sla_rate | tojson }}</script>
 </section>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
     document.addEventListener('DOMContentLoaded', function () {
         const menu = document.getElementById('export-metrics-menu');
         document.getElementById('export-metrics-btn').addEventListener('click', function () {

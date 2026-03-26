@@ -1,6 +1,9 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+load_dotenv()
+
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:

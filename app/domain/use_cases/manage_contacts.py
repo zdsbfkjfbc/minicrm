@@ -63,7 +63,7 @@ class UpdateContact:
         email: str | None,
         phone: str | None,
         status: str,
-        deadline=None,
+        deadline: date | None = None,
         observations: str | None,
     ) -> Contact:
         existing = self.contacts.get_by_id_for_user(

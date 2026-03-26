@@ -515,7 +515,7 @@ def alert_history():
 def system_settings():
     """Configurações do sistema (apenas Gestores)."""
     settings_uc = GetSetting(_settings_repo())
-    update_uc = UpdateSetting(_settings_repo())
+    update_uc = UpdateSetting(_settings_repo(), _audit_repo())
 
     form = SystemSettingsForm()
     days_inactive = settings_uc.execute('days_inactive_alert', '8')
@@ -529,9 +529,9 @@ def system_settings():
         days_value = str(form.days_inactive_alert.data)
         update_uc.execute(
             'days_inactive_alert', days_value,
+            user_id=current_user.id,
             description='Número de dias sem atividade para gerar alerta de inatividade'
         )
-        record_audit_event('alterou configuração', 'SystemSettings', None)
         db.session.commit()
         flash('Configurações salvas com sucesso!')
         return redirect(url_for('system_settings'))

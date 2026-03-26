@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>{{ title }} — MiniCRM</title>
 
-    <script>
+    <script nonce="{{ csp_nonce() }}">
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -290,7 +290,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script>
+    <script nonce="{{ csp_nonce() }}">
         (function () {
             const icon = document.getElementById('theme-icon');
             const toggle = document.getElementById('theme-toggle');

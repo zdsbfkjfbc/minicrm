@@ -38,7 +38,12 @@ def create_app(config_class=Config):
         'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         'font-src': ["'self'", "https://fonts.gstatic.com"]
     }
-    Talisman(app, content_security_policy=csp, force_https=not (app.debug or app.testing))
+    Talisman(
+        app,
+        content_security_policy=csp,
+        content_security_policy_nonce_in=['script-src'],
+        force_https=not (app.debug or app.testing),
+    )
     
     # Limiter
     Limiter(
