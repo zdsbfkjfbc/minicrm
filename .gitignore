@@ -4,8 +4,9 @@ __pycache__/
 *.pyc
 .env
 .pytest_cache/
+instance/
 
-# Banco de dados local (Não queremos subir dados reais/testes pro GitHub)
+# Banco de dados local
 app.db
 *.sqlite3
 
@@ -17,32 +18,7 @@ logs/
 .vscode/
 .gemini/
 
-# Developer Tools & Configs
-context-engineering-kit-master/
-Makefile
-pyproject.toml
-pyrightconfig.json
-.pre-commit-config.yaml
-.dockerignore
-Dockerfile
-docker-compose.yml
-.github/
-scripts/
-test_data.csv
-.env.example
-
-# Internal Documentation & Audits
-docs/
-CLAUDE.md
-SKILL.md
-SYSTEM_DESIGN.md
-ANTIGRAVITY_FASE_POR_FASE.md
-REFERENCIA_COMPLETA.md
-
 # Build & Executables
 dist/
 build/
 *.spec
-run_desktop.py
-zip_project.py
-minicrm_deploy_seguro.zip

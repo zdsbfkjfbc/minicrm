@@ -78,7 +78,7 @@ Ambos os endpoints dependem da sessão Flask-Login e servem como base para uma i
 - Runbook curto: se o job de importação ficar travado ou muitos alertas chegarem com erro, verifique `logs/minicrm.log`, rode `docker-compose restart web` e dispare um webhook de teste para confirmar o canal.
 
 ## Evolução visual
-- Mantivemos a paleta neutra com acentos laranja e expandimos a hierarquia tipográfica usando `Space Grotesk` e `Unbounded` para títulos e botões. Espaçamentos respiram melhor, cards ganharam sombras suaves e bordas arredondadas, e micro-interações (`btn-pill` hover, tabelas com destaque) reforçam o acabamento sem romper o layout original. A experiência segue o tom editorial recomendado pelo `SKILL.md`, sem transformar totalmente a interface.
+- Mantivemos a paleta neutra com acentos laranja e expandimos a hierarquia tipográfica usando `Space Grotesk` e `Unbounded` para títulos e botões. Espaçamentos respiram melhor, cards ganharam sombras suaves e bordas arredondadas, e micro-interações (`btn-pill` hover, tabelas com destaque) reforçam o acabamento sem romper o layout original.
 
 ## Infraestrutura e pipeline
 

@@ -2,7 +2,7 @@ services:
   - type: web
     name: minicrm
     env: python
-    buildCommand: "./build.sh"
+    buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn run:app"
     envVars:
       - key: PYTHON_VERSION

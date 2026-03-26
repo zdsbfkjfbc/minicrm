@@ -1,7 +1,7 @@
 """
 Suite de Testes TDD — Fase RED (Devem FALHAR)
 Valida vulnerabilidades e regras de negócio que o sistema ainda
-não trata de forma adequada segundo o CLAUDE.md:
+não trata de forma adequada:
 
   1. IDOR: Operador A NÃO deve acessar contatos do Operador B.
      Espera HTTP 403 Forbidden (atualmente devolve 302 redirect).

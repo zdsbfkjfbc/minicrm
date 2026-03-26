@@ -2,9 +2,9 @@ import csv
 import io
 from typing import Sequence
 
-from app import db
 from app.models import Contact
 from app.services.utils import sanitize_html
+from app.domain.use_cases.import_contacts import parse_csv_content as parse_domain_csv
 
 ALLOWED_STATUSES = {'Aberto', 'Aguardando Cliente', 'Resolvido', 'Cancelado'}
 
@@ -28,26 +28,17 @@ def parse_contact_row(row: Sequence[str]):
 
 
 def build_contacts(content: str, owner_id: int):
-    stream = io.StringIO(content, newline=None)
-    reader = csv.reader(stream)
-    next(reader, None)
+    domain_contacts, errors = parse_domain_csv(content)
     contacts = []
-    errors = []
-    for idx, row in enumerate(reader, start=2):
-        if not row or not row[0].strip():
-            continue
-        try:
-            customer_name, status, deadline, observations = parse_contact_row(row)
-        except ValueError as exc:
-            errors.append(f"Linha {idx}: {exc}")
-            continue
-
-        contact = Contact(
-            customer_name=customer_name,
-            status=status,
-            deadline=deadline,
-            observations=observations,
-            user_id=owner_id,
+    for item in domain_contacts:
+        contacts.append(
+            Contact(
+                customer_name=sanitize_html(item.customer_name),
+                contact_type=item.contact_type,
+                status=item.status,
+                deadline=item.deadline,
+                observations=sanitize_html(item.observations or ""),
+                user_id=owner_id,
+            )
         )
-        contacts.append(contact)
     return contacts, errors

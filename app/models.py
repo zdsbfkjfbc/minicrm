@@ -39,9 +39,10 @@ class Contact(db.Model):
         return f'<Contact {self.customer_name}>'
 
     def is_overdue(self):
-        if self.deadline and self.status != 'Resolvido':
-            return date.today() > self.deadline
-        return False
+        """Delegated to domain entity — kept here for template compatibility."""
+        from app.domain.entities.contact import Contact as DomainContact
+        dc = DomainContact(customer_name=self.customer_name, status=self.status, deadline=self.deadline)
+        return dc.is_overdue()
 
 class SystemSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)

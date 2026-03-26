@@ -75,7 +75,7 @@
                         <p class="contact-id">#{{ contact.id }}</p>
                     </td>
                     {% if current_user.role == 'Gestor' %}
-                    <td>{{ contact.owner.username if contact.owner else '—' }}</td>
+                    <td>{{ contact.owner_username or '—' }}</td>
                     {% endif %}
                     <td><span class="badge badge-{{ contact.status | lower | replace(' ', '-') }}">{{ contact.status }}</span></td>
                     <td>{{ contact.deadline.strftime('%d/%m/%Y') if contact.deadline else '—' }}</td>

@@ -50,7 +50,7 @@
                     <span class="block text-[10px] font-medium uppercase tracking-wider mb-1 text-muted">Responsável</span>
                     <span class="text-sm flex items-center gap-1.5 text-body">
                         <span class="material-symbols-outlined text-[14px] icon-muted">person</span>
-                        {{ contact.owner.username }}
+                        {{ contact.owner_username or '—' }}
                     </span>
                 </div>
                 <div>

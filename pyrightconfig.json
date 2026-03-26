@@ -1,0 +1,8 @@
+{
+    "venvPath": "d:\\Desenvolvimento\\minicrm",
+    "venv": "venv",
+    "extraPaths": [
+        "d:\\Desenvolvimento\\minicrm",
+        "d:\\Desenvolvimento\\minicrm\\app"
+    ]
+}
